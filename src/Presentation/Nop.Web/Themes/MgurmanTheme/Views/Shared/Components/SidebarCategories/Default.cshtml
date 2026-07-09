@@ -1,0 +1,27 @@
+﻿@model IList<Nop.Web.Models.Catalog.SidebarCategoryModel>
+<aside class="sidebar">
+    <div class="sidebar__nav">
+        <ul class="sidebar__list">
+            @foreach (var category in Model)
+            {
+                <li class="sidebar__item interactive">
+
+                    <div class="sidebar__icon-wrapper">
+                        <img src="@category.PictureUrl"
+                             alt="@category.Name"
+                             class="sidebar__item-img" />
+                    </div>
+
+                    <a href="@Url.RouteUrl("Category", new { SeName = category.SeName })"
+                           class="sidebar__item-text sidebar__item-block">
+                        @category.Name
+                    </a>
+
+                    @* <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/down_arrow.svg")"
+                    class="sidebar__item-arrow-ico" /> *@
+
+                </li>
+            }
+        </ul>
+    </div>
+</aside>

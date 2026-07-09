@@ -1,0 +1,24 @@
+﻿@using Nop.Web.Models.Homepage
+@model HomepageCategoryProductsModel
+
+<div class="products__block">
+    <div class="products__block-top">
+        <div class="products__block-title-wrapper">
+                                    
+            <img src="@Model.ImageUrl" alt="" class="products__block-title-img">
+            <p class="products__block-title page-title">@Model.Title</p>
+        </div>
+        <a href="/@Model.CategorySeName" class="products__block-link">Смотреть все</a>
+    </div>
+
+    <div class="products__list products-slider">
+        <div class="swiper-wrapper">
+            @foreach (var product in Model.Products)
+            {
+                <div class="swiper-slide">
+                    @await Html.PartialAsync("_ProductBox", product)
+                </div>
+            }
+        </div>
+    </div>
+</div>

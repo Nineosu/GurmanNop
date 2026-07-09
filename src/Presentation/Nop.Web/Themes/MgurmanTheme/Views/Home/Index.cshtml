@@ -1,0 +1,65 @@
+﻿@using Nop.Services.Localization
+@using Nop.Core
+@inject ILocalizationService localizationService
+@inject IStoreContext storeContext
+
+@{
+    Layout = "_ColumnsOne";
+
+    NopHtml.AppendPageCssClassParts("html-home-page");
+}
+
+<div class="page-layout">
+    <div class="wrapper">
+        <div class="categories-aside">
+            @await Component.InvokeAsync("SidebarCategories")
+        </div>
+
+        <main class="main">
+            @await Component.InvokeAsync(typeof(HomepageBannerViewComponent)) 
+            
+            <div class="main__cards">
+                <div class="main__cards-card">
+                    <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/main-card-1.svg")" alt="" class="main__card-img">
+                    <p class="main__card-text">Быстрая доставка по городу и пригороду</p>
+                </div>
+                <div class="main__cards-card">
+                    <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/main-card-2.svg")" alt="" class="main__card-img">
+                    <p class="main__card-text">Только свежие продукты</p>
+                </div>
+                <div class="main__cards-card">
+                    <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/main-card-3.svg")" alt="" class="main__card-img">
+                    <p class="main__card-text">Бережная сборка заказа</p>
+                </div>
+                <div class="main__cards-card">
+                    <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/main-card-4.svg")" alt="" class="main__card-img">
+                    <p class="main__card-text">Контроль качества и целостности товара</p>
+                </div>
+            </div>
+
+            @await Component.InvokeAsync(typeof(PromotionProductsViewComponent))
+
+            @await Component.InvokeAsync(typeof(PopularProductsViewComponent))
+
+            <section class="catalog__block">
+                <p class="catalog__block-title page-title">Каталог</p>
+
+                <div class="catalog__blocks-list">
+                    @await Component.InvokeAsync(
+                        typeof(HomepageCategoryProductsViewComponent),
+                        new { categoryId = 22 })
+
+                    @await Component.InvokeAsync(
+                       typeof(HomepageCategoryProductsViewComponent),
+                       new { categoryId = 1 })
+
+                    @await Component.InvokeAsync(
+                    typeof(HomepageCategoryProductsViewComponent),
+                    new { categoryId = 12 })
+
+                    <a href="@Url.Action("Catalog", "Catalog")" class="catalog__block-link">Перейти в каталог</a>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>

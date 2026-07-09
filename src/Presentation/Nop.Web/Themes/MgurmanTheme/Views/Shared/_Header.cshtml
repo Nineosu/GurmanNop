@@ -1,0 +1,110 @@
+﻿@using Nop.Core.Http
+
+<header class="header">
+    <div class="wrapper">
+        <div class="header__wrapper">
+            <div class="header__logo">
+                <a href="@Url.RouteUrl("Homepage")">
+                    <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/logo.svg")" alt="Гурманчик" class="logo-img">
+                </a>
+            </div>
+            <nav class="header__nav">
+                <ul class="header__list">
+
+                    <li class="header__list-item interactive">
+                        <a href="@Url.RouteUrl(NopRouteNames.General.HOMEPAGE)">
+                            Главная
+                        </a>
+                    </li>
+
+                    <li class="header__list-item interactive">
+                        <a href="@Url.RouteUrl("NewProducts")">
+                            Акции
+                        </a>
+                    </li>
+
+                    <li class="header__list-item interactive">
+                        <a href="@Url.RouteUrl("Topic", new { SeName = "delivery-info" })">
+                            Условия доставки
+                        </a>
+                    </li>
+
+                    <li class="header__list-item interactive">
+                        <a href="@Url.RouteUrl("Topic", new { SeName = "for-business" })">
+                            Юр. Лицам
+                        </a>
+                    </li>
+
+                    <li class="header__list-item interactive">
+                        <a href="@Url.RouteUrl("Topic", new { SeName = "pensioners" })">
+                            Пенсионерам
+                        </a>
+                    </li>
+
+                    <li class="header__list-item interactive">
+                        <a href="@Url.RouteUrl("Topic", new { SeName = "about-us" })">
+                            О компании
+                        </a>
+                    </li>
+
+                    <li class="header__list-item interactive">
+                        <a href="@Url.RouteUrl("ContactUs")">
+                            Контакты
+                        </a>
+                    </li>
+
+                </ul>
+            </nav>
+            <div class="header__tel">
+                <a href="tel:+79789858852" class="header__tel-number">+7 978 985 88 52</a>
+            </div>
+        </div>
+        <div class="header__wrapper">
+            <div class="header__category-block">
+                <button class="header__burger-btn burger-btn" id="burger" data-menu="categories">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <a href="@Url.Action("Catalog", "Catalog")" class="header__category">Категории</a>
+            </div>
+                
+            <div class="header__search">
+                <input id="search-input"
+                       type="text"
+                       autocomplete="off"
+                       data-url="@Url.RouteUrl("ProductSearchAutoComplete")" 
+                       placeholder="Поиск товаров" />
+
+                <button type="button" class="header__search-btn">
+                    <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/search-ico.svg")"
+                         alt="Поиск"
+                         class="header__search-ico">
+                </button>
+
+                <div class="header__search-dropdown" id="search-dropdown"></div>
+            </div>
+
+            <div class="header__btns">
+                <a href="@Url.RouteUrl(NopRouteNames.General.CUSTOMER_INFO)" class="header__btn">
+                    <div class="header__btn-top">
+                        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/profile.svg")" alt="" class="header__btn-img">
+                    </div>
+                    <p class="header__btn-text">Профиль</p>
+                </a>
+                <a href="./favorites.html" class="header__btn">
+                    <div class="header__btn-top">
+                        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/favorites.svg")" alt="" class="header__btn-img">
+                    </div>
+                    <p class="header__btn-text">Избранное</p>
+                </a>
+                <a href="@Url.RouteUrl(NopRouteNames.General.CART)" class="header__btn">
+                    <div class="header__btn-top">
+                        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/cart.svg")" alt="" class="header__btn-img">
+                    </div>
+                    <p class="header__btn-text">Корзина</p>
+                </a>
+            </div>
+        </div>
+    </div>
+</header>

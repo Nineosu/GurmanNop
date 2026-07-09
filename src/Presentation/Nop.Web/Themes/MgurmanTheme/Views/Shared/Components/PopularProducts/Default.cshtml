@@ -1,0 +1,31 @@
+﻿@model Nop.Web.Models.Homepage.HomepageProductBlockModel
+
+<div class="products__block">
+    <div class="products__block-top">
+        <p class="products__block-title page-title">@Model.Title</p>
+        <a href="#!" class="products__block-link">Смотреть все</a>
+    </div>
+
+    <div class="products__list products-slider">
+        <div class="swiper-wrapper">
+            @if (Model.Products.Any())
+            {
+                @foreach (var product in Model.Products)
+                {
+                    <div class="swiper-slide">
+                        @await Html.PartialAsync("_ProductBox", product)
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="swiper-slide products__empty">
+                    <p>Нет популярных товаров</p>
+                </div>
+            }
+        </div>
+
+        <div class="swiper-button-next products-slider-next"></div>
+        <div class="swiper-button-prev products-slider-prev"></div>
+    </div>
+</div>

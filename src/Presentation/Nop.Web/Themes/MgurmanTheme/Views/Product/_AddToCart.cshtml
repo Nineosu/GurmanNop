@@ -1,0 +1,56 @@
+﻿@model ProductDetailsModel.AddToCartModel
+@using Nop.Core.Http
+@using Nop.Core.Domain.Orders
+
+@if (Model.UpdatedShoppingCartItemId > 0)
+{
+    <input asp-for="UpdatedShoppingCartItemId" type="hidden" />
+}
+
+@if (!Model.DisableBuyButton || Model.CustomerEntersPrice)
+{
+    <div class="add-to-cart">
+
+        @if (Model.CustomerEntersPrice)
+        {
+            <input asp-for="CustomerEnteredPrice" type="hidden" />
+        }
+
+        @if (!string.IsNullOrEmpty(Model.MinimumQuantityNotification))
+        {
+            <div class="min-qty-notification">
+                @Model.MinimumQuantityNotification
+            </div>
+        }
+
+        @if (!Model.DisableBuyButton)
+        {
+            <div class="add-to-cart-panel">
+
+                @* важно: quantity остаётся для Nop *@
+                <input asp-for="EnteredQuantity"
+                       id="product_enteredQuantity_@Model.ProductId"
+                       type="hidden" />
+
+                <button type="button"
+                        id="add-to-cart-button-@Model.ProductId"
+                        class="product-card__btn add-to-cart-button"
+                        data-productid="@Model.ProductId"
+                        onclick="AjaxCart.addproducttocart_details(
+                    '@Url.RouteUrl(NopRouteNames.Ajax.ADD_PRODUCT_TO_CART_DETAILS,
+                                                    new { productId = Model.ProductId, shoppingCartTypeId = (int)ShoppingCartType.ShoppingCart })',
+                    '#product-details-form'); return false;">
+
+                    <img src="~/Themes/MgurmanTheme/Content/images/product-page-cart.svg" alt="">
+                    В корзину
+
+                </button>
+
+            </div>
+        }
+
+        @await Component.InvokeAsync(typeof(WidgetViewComponent),
+            new { widgetZone = PublicWidgetZones.ProductDetailsAddInfo, additionalData = Model })
+
+    </div>
+}

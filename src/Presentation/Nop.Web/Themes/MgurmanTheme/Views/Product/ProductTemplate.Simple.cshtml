@@ -1,0 +1,194 @@
+﻿@model ProductDetailsModel
+
+@using Nop.Core
+@using Nop.Core.Domain.Catalog
+@using Nop.Core.Domain.Seo
+@using Nop.Services.Html
+@using Nop.Core.Http
+
+@inject IHtmlFormatter htmlFormatter
+@inject IWebHelper webHelper
+@inject SeoSettings seoSettings
+@inject INopUrlHelper NopUrl
+
+@{
+    Layout = "_ColumnsOne";
+
+    NopHtml.AddTitleParts(!string.IsNullOrEmpty(Model.MetaTitle)
+        ? Model.MetaTitle
+        : Model.Name);
+
+    NopHtml.AddMetaDescriptionParts(Model.MetaDescription);
+    NopHtml.AddMetaKeywordParts(Model.MetaKeywords);
+
+    NopHtml.AppendPageCssClassParts("html-product-details-page");
+
+    if (seoSettings.CanonicalUrlsEnabled)
+    {
+        var productUrl = (await NopUrl.RouteGenericUrlAsync<Product>(
+            new { SeName = Model.SeName },
+            webHelper.GetCurrentRequestProtocol())).ToLowerInvariant();
+
+        NopHtml.AddCanonicalUrlParts(productUrl,
+            seoSettings.QueryStringInCanonicalUrlsEnabled);
+    }
+}
+
+<div class="page-layout">
+
+    <div class="wrapper">
+
+        <div class="categories-aside">
+            @await Component.InvokeAsync("SidebarCategories")
+        </div>
+
+        <main class="main-product-page">
+
+            <nav class="breadcrumbs">
+                <a href="@Url.RouteUrl(NopRouteNames.General.HOMEPAGE)">
+                    Главная
+                </a>
+
+                @foreach (var crumb in Model.Breadcrumb.CategoryBreadcrumb)
+                {
+                    <span>></span>
+
+                    <a href="@(await NopUrl.RouteGenericUrlAsync<Category>(
+                                                                      new { SeName = crumb.SeName }))">
+                        @crumb.Name
+                    </a>
+                }
+
+                <span>></span>
+
+                <span>@Model.Name</span>
+            </nav>
+
+            <a href="javascript:history.back()"
+               class="back-btn product-page__back-btn">
+                < Вернуться назад
+                </a>
+
+                <form asp-route="Product"
+                      asp-route-sename="@Model.SeName"
+                      method="post"
+                      id="product-details-form">
+
+                    <div class="product__big-card">
+
+                        <div class="product-card__block">
+
+                            @await Html.PartialAsync("_ProductDetailsPictures", Model)
+
+                        </div>
+
+                        <div class="product-card__block product-card__info">
+
+                            <p class="product-card__title page-title">
+                                @Model.Name
+                            </p>
+
+                            <div class="product-card__price">
+                                @{
+                                    var priceModel = Model.ProductPrice;
+                                }
+
+                                <span class="current-price">
+                                    @priceModel.Price
+                                </span>
+
+                                @if (!string.IsNullOrEmpty(priceModel.OldPrice))
+                                {
+                                    <span class="old-price">
+                                        @priceModel.OldPrice
+                                    </span>
+                                }
+                            </div>
+
+                            <div class="product-attributes-hidden">
+                                @{
+                                    var dataDictAttributes = new ViewDataDictionary(ViewData);
+                                    dataDictAttributes.TemplateInfo.HtmlFieldPrefix = $"attributes_{Model.Id}";
+                                    @await Html.PartialAsync("_ProductAttributes", Model, dataDictAttributes)
+                                }
+                            </div>
+
+                            @{
+                                var isWeightProduct = Model.MeasureTypeId == 1;
+                            }
+
+                            <div class="product-card__counter product-counter"
+                                 data-unit="@(isWeightProduct ? "kg" : "шт")"
+                                 data-step="@(isWeightProduct ? "0.1" : "1")"
+                                 data-min="@(isWeightProduct ? "0.1" : "1")"
+                                 data-max="@(isWeightProduct ? "2" : "99")"
+                                 data-product-id="@Model.Id"
+                                 data-is-weight="@isWeightProduct.ToString().ToLower()">
+
+                                <button type="button" class="counter-btn counter-block btn-minus"></button>
+
+                                <div class="counter-block counter__value-block">
+                                    <input type="text"
+                                           class="counter-value"
+                                           value="@(isWeightProduct ? "1.0" : "1")"
+                                           inputmode="decimal">
+                                    <span class="counter-unit">@(isWeightProduct ? "кг" : "шт")</span>
+                                </div>
+
+                                <button type="button" class="counter-btn counter-block btn-plus"></button>
+
+                            </div>
+
+                            <div class="product-card__btns">
+
+                                @{
+                                    var dataDictAddToCart = new ViewDataDictionary(ViewData);
+                                    dataDictAddToCart.TemplateInfo.HtmlFieldPrefix = $"addtocart_{Model.Id}";
+                                    @await Html.PartialAsync("_AddToCart", Model.AddToCart, dataDictAddToCart)
+                                }
+
+                                <button type="button"
+                                        class="product-card__btn">
+                                    <img src="~/Themes/MgurmanTheme/Content/images/product-page-favorite.svg" />
+                                    Избранное
+                                </button>
+
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(Model.ShortDescription))
+                            {
+                                <div class="product-description">
+                                    @Html.Raw(Model.ShortDescription)
+                                </div>
+                            }
+
+                        </div>
+
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.FullDescription))
+                    {
+                        <div class="full-description">
+                            @Html.Raw(Model.FullDescription)
+                        </div>
+                    }
+
+                </form>
+
+                <p class="product-page__subtitle">
+                    Вместе с этим товаром также покупают
+                </p>
+
+                <div class="related-products">
+
+                    @await Component.InvokeAsync(
+                        typeof(RelatedProductsViewComponent),
+                        new { productId = Model.Id })
+
+                </div>
+
+            </main>
+
+        </div>
+
+    </div>

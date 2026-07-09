@@ -1,0 +1,995 @@
+﻿@using Nop.Core.Http;
+@inject INopUrlHelper NopUrl
+
+@model RegisterModel
+
+@{
+    Layout = "_ColumnsOne";
+
+    NopHtml.AddTitleParts(T("PageTitle.Register").Text);
+    NopHtml.AppendPageCssClassParts("html-registration-page");
+}
+
+<div class="page-layout simple-layout">
+
+    <div class="account-page__background">
+        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account-bg-1.svg")" alt="" class="background-img">
+        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account-bg-2.svg")" alt="" class="background-img">
+        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account-bg-1.svg")" alt="" class="background-img">
+        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account-bg-1.svg")" alt="" class="background-img">
+        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account-bg-2.svg")" alt="" class="background-img">
+        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account-bg-1.svg")" alt="" class="background-img">
+    </div>
+
+    <div class="wrapper">
+
+        <main class="main-register">
+
+            <p class="register__title page-title">
+                @T("Account.Register")
+            </p>
+
+            @await Component.InvokeAsync(typeof(WidgetViewComponent), new 
+            { 
+                widgetZone = PublicWidgetZones.RegisterTop, 
+                additionalData = Model 
+            })
+
+            <form asp-route="@NopRouteNames.Standard.REGISTER"
+                  asp-route-returnurl="@Context.Request.Query["ReturnUrl"]"
+                  method="post"
+                  autocomplete="off"
+                  class="register-form">
+
+
+                <div asp-validation-summary="ModelOnly" class="message-error"></div>
+
+
+                <section class="fieldset">
+
+
+                    @if (Model.GenderEnabled)
+                    {
+                        <div class="input-group">
+
+                            <div id="gender" class="gender">
+
+                                <span class="male">
+                                    <input type="radio"
+                                           asp-for="Gender"
+                                           value="M"
+                                           checked="@(Model.Gender == "M")"
+                                           id="gender-male" />
+
+                                    <label for="gender-male">
+                                        @T("Account.Fields.Gender.Male")
+                                    </label>
+                                </span>
+
+
+                                <span class="female">
+
+                                    <input type="radio"
+                                           asp-for="Gender"
+                                           value="F"
+                                           checked="@(Model.Gender == "F")"
+                                           id="gender-female" />
+
+                                    <label for="gender-female">
+                                        @T("Account.Fields.Gender.Female")
+                                    </label>
+
+                                </span>
+
+
+                                @if (Model.NeutralGenderEnabled)
+                                {
+                                    <span class="Neutral">
+
+                                        <input type="radio"
+                                               asp-for="Gender"
+                                               value="N"
+                                               checked="@(Model.Gender == "N")"
+                                               id="gender-neutral" />
+
+                                        <label for="gender-neutral">
+                                            @T("Account.Fields.Gender.Neutral")
+                                        </label>
+
+                                    </span>
+                                }
+
+                            </div>
+
+                        </div>
+                    }
+
+
+
+                    @if (Model.FirstNameEnabled)
+                    {
+                        <div class="input-group">
+
+                            <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account-ico-1.svg")"
+                                 alt=""
+                                 class="profile-form__icon">
+
+
+                            <input asp-for="FirstName"
+                                   class="profile-form__input"
+                                   placeholder="@T("Account.Fields.FirstName")"
+                                   autocomplete="given-name">
+
+
+                            @if (Model.FirstNameRequired)
+                            {
+                                <nop-required />
+                            }
+
+
+                            <span asp-validation-for="FirstName"></span>
+
+                        </div>
+                    }
+
+
+
+                    @if (Model.LastNameEnabled)
+                    {
+                        <div class="input-group">
+
+                            <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account-ico-1.svg")"
+                                 alt=""
+                                 class="profile-form__icon">
+
+
+                            <input asp-for="LastName"
+                                   class="profile-form__input"
+                                   placeholder="@T("Account.Fields.LastName")"
+                                   autocomplete="family-name">
+
+
+                            @if (Model.LastNameRequired)
+                            {
+                                <nop-required />
+                            }
+
+
+                            <span asp-validation-for="LastName"></span>
+
+                        </div>
+                    }
+
+
+
+                    <div class="input-group">
+
+                        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account-ico-2.svg")"
+                             alt=""
+                             class="profile-form__icon">
+
+
+                        <input asp-for="Email"
+                               class="profile-form__input"
+                               placeholder="@T("Account.Fields.Email")"
+                               autocomplete="email">
+
+
+                        <nop-required />
+
+
+                        <span asp-validation-for="Email"></span>
+
+                    </div>
+
+
+
+                    @if (Model.EnteringEmailTwice)
+                    {
+                        <div class="input-group">
+
+                            <img src="/img/account-ico-2.svg"
+                                 alt=""
+                                 class="profile-form__icon">
+
+
+                            <input asp-for="ConfirmEmail"
+                                   class="profile-form__input"
+                                   placeholder="@T("Account.Fields.ConfirmEmail")">
+
+
+                            <nop-required />
+
+
+                            <span asp-validation-for="ConfirmEmail"></span>
+
+                        </div>
+                    }
+
+
+
+                    @if (Model.UsernamesEnabled)
+                    {
+
+                        <div class="input-group">
+
+                            <img src="/img/account-ico-1.svg"
+                                 alt=""
+                                 class="profile-form__icon">
+
+
+                            <input asp-for="Username"
+                                   class="profile-form__input"
+                                   placeholder="@T("Account.Fields.Username")">
+
+
+                            <nop-required />
+
+
+                            <span asp-validation-for="Username"></span>
+
+
+                            @if (Model.CheckUsernameAvailabilityEnabled)
+                            {
+                                @await Html.PartialAsync("_CheckUsernameAvailability")
+                            }
+
+                        </div>
+
+                    }
+
+
+                </section>
+                @if (Model.CompanyEnabled || Model.DisplayVatNumber)
+                {
+                    <section class="fieldset">
+
+                        <h2 class="title">
+                            @T("Account.CompanyDetails")
+                        </h2>
+
+
+                        @if (Model.CompanyEnabled)
+                        {
+                            <div class="input-group">
+
+                                <img src="/img/account-ico-1.svg"
+                                     alt=""
+                                     class="profile-form__icon">
+
+
+                                <input asp-for="Company"
+                                       class="profile-form__input"
+                                       placeholder="@T("Account.Fields.Company")">
+
+
+                                @if (Model.CompanyRequired)
+                                {
+                                    <nop-required />
+                                }
+
+
+                                <span asp-validation-for="Company"></span>
+
+                            </div>
+                        }
+
+
+                        @if (Model.DisplayVatNumber)
+                        {
+                            <div class="input-group">
+
+                                <img src="/img/account-ico-1.svg"
+                                     alt=""
+                                     class="profile-form__icon">
+
+
+                                <input asp-for="VatNumber"
+                                       class="profile-form__input"
+                                       placeholder="@T("Account.Fields.VatNumber")">
+
+
+                                @if (Model.VatNumberRequired)
+                                {
+                                    <nop-required />
+                                }
+
+
+                                <span asp-validation-for="VatNumber"></span>
+
+                                <span class="vat-note">
+                                    <em>
+                                        @T("Account.Fields.VatNumber.Note")
+                                    </em>
+                                </span>
+
+                            </div>
+                        }
+
+                    </section>
+                }
+
+
+
+                @if (Model.StreetAddressEnabled ||
+                     Model.StreetAddress2Enabled ||
+                     Model.ZipPostalCodeEnabled ||
+                     Model.CityEnabled ||
+                     Model.CountyEnabled ||
+                     Model.CountryEnabled)
+                {
+
+                    <section class="fieldset">
+
+                        <h2 class="title">
+                            @T("Account.YourAddress")
+                        </h2>
+
+
+
+                        @if (Model.StreetAddressEnabled)
+                        {
+
+                            <div class="input-group">
+
+                                <img src="/img/account-ico-1.svg"
+                                     alt=""
+                                     class="profile-form__icon">
+
+
+                                <input asp-for="StreetAddress"
+                                       class="profile-form__input"
+                                       placeholder="@T("Account.Fields.StreetAddress")">
+
+
+                                @if (Model.StreetAddressRequired)
+                                {
+                                    <nop-required />
+                                }
+
+
+                                <span asp-validation-for="StreetAddress"></span>
+
+                            </div>
+
+                        }
+
+
+
+                        @if (Model.StreetAddress2Enabled)
+                        {
+
+                            <div class="input-group">
+
+                                <img src="/img/account-ico-1.svg"
+                                     alt=""
+                                     class="profile-form__icon">
+
+
+                                <input asp-for="StreetAddress2"
+                                       class="profile-form__input"
+                                       placeholder="@T("Account.Fields.StreetAddress2")">
+
+
+                                @if (Model.StreetAddress2Required)
+                                {
+                                    <nop-required />
+                                }
+
+
+                                <span asp-validation-for="StreetAddress2"></span>
+
+                            </div>
+
+                        }
+
+
+
+                        @if (Model.ZipPostalCodeEnabled)
+                        {
+
+                            <div class="input-group">
+
+                                <img src="/img/account-ico-1.svg"
+                                     alt=""
+                                     class="profile-form__icon">
+
+
+                                <input asp-for="ZipPostalCode"
+                                       class="profile-form__input"
+                                       placeholder="@T("Account.Fields.ZipPostalCode")">
+
+
+                                @if (Model.ZipPostalCodeRequired)
+                                {
+                                    <nop-required />
+                                }
+
+
+                                <span asp-validation-for="ZipPostalCode"></span>
+
+                            </div>
+
+                        }
+
+
+
+                        @if (Model.CountyEnabled)
+                        {
+
+                            <div class="input-group">
+
+                                <img src="/img/account-ico-1.svg"
+                                     alt=""
+                                     class="profile-form__icon">
+
+
+                                <input asp-for="County"
+                                       class="profile-form__input"
+                                       placeholder="@T("Account.Fields.County")">
+
+
+                                @if (Model.CountyRequired)
+                                {
+                                    <nop-required />
+                                }
+
+
+                                <span asp-validation-for="County"></span>
+
+                            </div>
+
+                        }
+
+
+
+                        @if (Model.CityEnabled)
+                        {
+
+                            <div class="input-group">
+
+                                <img src="/img/account-ico-1.svg"
+                                     alt=""
+                                     class="profile-form__icon">
+
+
+                                <input asp-for="City"
+                                       class="profile-form__input"
+                                       placeholder="@T("Account.Fields.City")">
+
+
+                                @if (Model.CityRequired)
+                                {
+                                    <nop-required />
+                                }
+
+
+                                <span asp-validation-for="City"></span>
+
+                            </div>
+
+                        }
+
+
+
+
+                        @if (Model.CountryEnabled)
+                        {
+
+                            <div class="input-group select-group">
+
+                                <select asp-for="CountryId"
+                                        asp-items="Model.AvailableCountries"
+                                        data-trigger="country-select"
+                                        data-url="@(Url.RouteUrl(NopRouteNames.Ajax.GET_STATES_BY_COUNTRY_ID))"
+                                        data-stateprovince="#@Html.IdFor(model => model.StateProvinceId)"
+                                        data-loading="#states-loading-progress"
+                                        class="profile-form__input">
+                                </select>
+
+
+                                @if (Model.CountryRequired)
+                                {
+                                    <nop-required />
+                                }
+
+
+                                <span asp-validation-for="CountryId"></span>
+
+                            </div>
+
+                        }
+
+
+
+                        @if (Model.CountryEnabled && Model.StateProvinceEnabled)
+                        {
+
+                            <div class="input-group select-group">
+
+                                <select asp-for="StateProvinceId"
+                                        asp-items="Model.AvailableStates"
+                                        class="profile-form__input">
+                                </select>
+
+
+                                @if (Model.StateProvinceRequired)
+                                {
+                                    <nop-required />
+                                }
+
+
+                                <span id="states-loading-progress"
+                                      style="display:none"
+                                      class="please-wait">
+                                    @T("Common.Wait")
+                                </span>
+
+
+                                <span asp-validation-for="StateProvinceId"></span>
+
+                            </div>
+
+                        }
+
+
+                    </section>
+
+                }
+
+
+
+
+
+                @if (Model.PhoneEnabled || Model.FaxEnabled)
+                {
+
+                    <section class="fieldset">
+
+                        <h2 class="title">
+                            @T("Account.YourContactInformation")
+                        </h2>
+
+
+
+                        @if (Model.PhoneEnabled)
+                        {
+
+                            <div class="input-group">
+
+                                <img src="/img/account-ico-1.svg"
+                                     alt=""
+                                     class="profile-form__icon">
+
+
+                                <input asp-for="Phone"
+                                       class="profile-form__input"
+                                       placeholder="@T("Account.Fields.Phone")">
+
+
+                                @if (Model.PhoneRequired)
+                                {
+                                    <nop-required />
+                                }
+
+
+                                <span asp-validation-for="Phone"></span>
+
+                            </div>
+
+                        }
+
+
+
+
+                        @if (Model.FaxEnabled)
+                        {
+
+                            <div class="input-group">
+
+                                <img src="/img/account-ico-1.svg"
+                                     alt=""
+                                     class="profile-form__icon">
+
+
+                                <input asp-for="Fax"
+                                       class="profile-form__input"
+                                       placeholder="@T("Account.Fields.Fax")">
+
+
+                                @if (Model.FaxRequired)
+                                {
+                                    <nop-required />
+                                }
+
+
+                                <span asp-validation-for="Fax"></span>
+
+                            </div>
+
+                        }
+
+                    </section>
+
+                }
+                @if (Model.NewsletterEnabled && Model.NewsLetterSubscriptions.Count > 0)
+                {
+                    <section class="fieldset">
+
+                        <h2 class="title">
+                            @T("Account.SubscribeToNewsletter")
+                        </h2>
+
+
+                        <div class="input-group">
+
+                            <div class="attributes">
+
+                                @for (int i = 0; i < Model.NewsLetterSubscriptions.Count; i++)
+                                {
+                                    <div class="newsletter-item">
+
+                                        <label asp-for="NewsLetterSubscriptions[i].IsActive">
+                                            @Model.NewsLetterSubscriptions[i].Name
+                                        </label>
+
+
+                                        <input type="hidden"
+                                               asp-for="NewsLetterSubscriptions[i].TypeId" />
+
+
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               asp-for="NewsLetterSubscriptions[i].IsActive" />
+
+                                    </div>
+                                }
+
+                            </div>
+
+                        </div>
+
+                    </section>
+                }
+
+
+
+
+                @if (Model.CustomerAttributes.Count > 0)
+                {
+
+                    <section class="fieldset">
+
+                        <h2 class="title">
+                            @T("Account.Options")
+                        </h2>
+
+
+                        <div class="input-group">
+
+                            @await Html.PartialAsync("_CustomerAttributes", Model.CustomerAttributes)
+
+                        </div>
+
+                    </section>
+
+                }
+
+
+
+
+
+                @if (Model.AllowCustomersToSetTimeZone)
+                {
+
+                    <section class="fieldset">
+
+                        <h2 class="title">
+                            @T("Account.Preferences")
+                        </h2>
+
+
+                        <div class="input-group">
+
+                            <select asp-for="TimeZoneId"
+                                    asp-items="Model.AvailableTimeZones"
+                                    class="profile-form__input">
+                            </select>
+
+
+                            <span asp-validation-for="TimeZoneId"></span>
+
+                        </div>
+
+                    </section>
+
+                }
+
+
+
+
+
+                <section class="fieldset">
+
+
+                    <div class="input-group">
+
+                        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account_password-ico.svg")"
+                             alt=""
+                             class="profile-form__icon">
+
+
+                        <input asp-for="Password"
+                               class="profile-form__input"
+                               placeholder="@T("Account.Fields.Password")">
+
+
+                        <nop-required />
+
+
+                        <span asp-validation-for="Password"></span>
+
+                    </div>
+
+
+
+
+                    <div class="input-group">
+
+                        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account_password-ico.svg")"
+                             alt=""
+                             class="profile-form__icon"
+                             style="opacity: 0; pointer-events: none;">
+
+
+                        <input asp-for="ConfirmPassword"
+                               class="profile-form__input"
+                               placeholder="@T("Account.Fields.ConfirmPassword")">
+
+
+                        <nop-required />
+
+
+                        <span asp-validation-for="ConfirmPassword"></span>
+
+                    </div>
+
+
+
+                    @if (Model.DisplayCaptcha)
+                    {
+                        <nop-captcha />
+                    }
+
+
+
+                    @if (Model.HoneypotEnabled)
+                    {
+                        @Html.Raw(Html.GenerateHoneypotInput())
+                    }
+
+
+                </section>
+
+
+
+
+
+                @if (Model.AcceptPrivacyPolicyEnabled || Model.GdprConsents.Count > 0)
+                {
+
+                    <section class="fieldset">
+
+                        <h2 class="title">
+                            @T("Account.UserAgreement")
+                        </h2>
+
+
+
+                        @if (Model.AcceptPrivacyPolicyEnabled)
+                        {
+
+                            <script asp-location="Footer">
+
+                                                    $(function () {
+
+                                                        $('#register-button').on('click', function () {
+
+                                                            if ($('#accept-consent').is(':checked')) {
+
+                                                                return true;
+
+                                                            }
+                                                            else {
+
+                                                                alert('@Html.Raw(JavaScriptEncoder.Default.Encode(T("Account.Fields.AcceptPrivacyPolicy.Required").Text))');
+
+                                                                return false;
+
+                                                            }
+
+                                                        });
+
+                                                    });
+
+                            </script>
+
+
+
+
+                            <div class="input-group accept-consent">
+
+
+                                <input id="accept-consent"
+                                       type="checkbox"
+                                       name="accept-consent" />
+
+
+                                <label for="accept-consent">
+
+                                    @T("Account.Fields.AcceptPrivacyPolicy")
+
+                                </label>
+
+
+
+                                @if (Model.AcceptPrivacyPolicyPopup)
+                                {
+
+                                    <span class="read"
+                                          id="read-privacyinfo">
+
+                                        @T("Account.Fields.AcceptPrivacyPolicy.Read")
+
+                                    </span>
+
+
+                                    <script asp-location="Footer">
+
+                                                                $(function () {
+
+                                                                    $('#read-privacyinfo').on('click',
+                                                                        function () {
+
+                                                                            displayPopupContentFromUrl(
+                                                                                '@Url.RouteUrl(NopRouteNames.Ajax.TOPIC_POPUP, new { SystemName = "privacyinfo" })',
+                                                                                '@T("Account.Fields.AcceptPrivacyPolicy")'
+                                                                            );
+
+                                                                        });
+
+                                                                });
+
+                                    </script>
+
+                                }
+                                else
+                                {
+
+                                    <a class="read"
+                                       id="read-privacyinfo"
+                                       href="@await NopUrl.RouteTopicUrlAsync("privacyinfo")">
+
+                                        @T("Account.Fields.AcceptPrivacyPolicy.Read")
+
+                                    </a>
+
+                                }
+
+
+                            </div>
+
+                        }
+
+
+
+
+
+                        @if (Model.GdprConsents.Count > 0)
+                        {
+
+                            foreach (var consent in Model.GdprConsents)
+                            {
+
+                                if (consent.IsRequired)
+                                {
+
+                                    <script asp-location="Footer">
+
+                                                            $(function () {
+
+                                                                $('#register-button').on('click', function () {
+
+                                                                    if ($('#consent@(consent.Id)').is(':checked')) {
+
+                                                                        return true;
+
+                                                                    }
+                                                                    else {
+
+                                                                        alert('@Html.Raw(JavaScriptEncoder.Default.Encode(consent.RequiredMessage))');
+
+                                                                        return false;
+
+                                                                    }
+
+                                                                });
+
+                                                            });
+
+                                    </script>
+
+                                }
+
+
+
+                                <div class="input-group accept-consent">
+
+
+                                    <input id="consent@(consent.Id)"
+                                           type="checkbox"
+                                           name="consent@(consent.Id)"
+                                           checked="@consent.Accepted" />
+
+
+
+                                    <label for="consent@(consent.Id)">
+
+                                        @consent.Message
+
+                                    </label>
+
+
+                                </div>
+
+                            }
+
+                        }
+
+
+                    </section>
+
+                }
+
+
+
+
+                <section class="buttons">
+
+                    <button type="submit"
+                            name="register-button"
+                            id="register-button"
+                            class="login-form__btn login-btn">
+
+                        @T("Account.Register.Button")
+
+                    </button>
+
+                </section>
+
+
+            </form>
+
+
+
+
+            <div class="external-authentication">
+
+                @await Component.InvokeAsync(typeof(ExternalMethodsViewComponent), "ExternalAuthentication")
+
+            </div>
+
+
+
+            @await Component.InvokeAsync(typeof(WidgetViewComponent), new
+            {
+                widgetZone = PublicWidgetZones.RegisterBottom,
+                additionalData = Model
+            })
+
+
+        </main>
+
+    </div>
+
+</div>

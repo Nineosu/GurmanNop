@@ -1,0 +1,144 @@
+﻿@model CheckoutBillingAddressModel
+@using Nop.Core
+@using Nop.Core.Http
+@inject IWebHelper webHelper
+
+@{
+    var storeLocation = webHelper.GetStoreLocation();
+}
+
+<div class="checkout-data">
+
+    @await Component.InvokeAsync(typeof(WidgetViewComponent),
+        new { widgetZone = PublicWidgetZones.OpCheckoutBillingAddressTop, additionalData = Model })
+
+    @if (Model.ShipToSameAddressAllowed)
+    {
+        <div class="section ship-to-same-address">
+            <p class="selector">
+                <input asp-for="ShipToSameAddress" />
+                <label asp-for="ShipToSameAddress">@T("Checkout.ShipToSameAddress")</label>
+            </p>
+        </div>
+    }
+
+    @if (false)
+    {
+        <div class="section select-billing-address">
+            <label for="billing-address-select">@T("Checkout.SelectBillingAddressOrEnterNewOne")</label>
+
+            <div class="opc-select-address-container">
+                <select name="billing_address_id"
+                        id="billing-address-select"
+                        class="address-select"
+                        onchange="Billing.newAddress(!this.value)">
+
+                    @foreach (var address in Model.ExistingAddresses)
+                    {
+                        var addressLine = address.FirstName + " " + address.LastName;
+
+                        if (!string.IsNullOrEmpty(address.Address1))
+                            addressLine += ", " + address.Address1;
+
+                        if (!string.IsNullOrEmpty(address.City))
+                            addressLine += ", " + address.City;
+
+                        if (!string.IsNullOrEmpty(address.ZipPostalCode))
+                            addressLine += " " + address.ZipPostalCode;
+
+                        <option value="@address.Id">@addressLine</option>
+                    }
+
+                    <option value="" selected="@Model.NewAddressPreselected">
+                        @T("Checkout.NewAddress")
+                    </option>
+                </select>
+            </div>
+        </div>
+    }
+
+    @await Component.InvokeAsync(typeof(WidgetViewComponent),
+        new { widgetZone = PublicWidgetZones.OpCheckoutBillingAddressMiddle, additionalData = Model })
+
+    <div class="section new-billing-address" id="billing-new-address-form">
+        <div class="enter-address">
+            <div asp-validation-summary="ModelOnly" class="message-error"></div>
+
+            @{
+                var dataDictAddress = new ViewDataDictionary(ViewData);
+                dataDictAddress.TemplateInfo.HtmlFieldPrefix = "BillingNewAddress";
+
+                @await Html.PartialAsync("_CreateOrUpdateAddress",
+                    Model.BillingNewAddress,
+                    dataDictAddress)
+            }
+        </div>
+    </div>
+
+    <fieldset>
+        <legend class="fieldset-title">Способ оплаты</legend>
+
+        <div class="form-block">
+            <input type="radio" name="payment_method" id="payment-card" class="form__radio-input" value="pay_card" checked>
+            <label for="payment-card" class="form__radio-btn interactive">Картой</label>
+
+            <input type="radio" name="payment_method" id="payment-cash" class="form__radio-input" value="pay_cash">
+            <label for="payment-cash" class="form__radio-btn interactive">Наличными</label>
+
+            <input type="radio" name="payment_method" id="payment-online" class="form__radio-input" value="pay_online">
+            <label for="payment-online" class="form__radio-btn interactive">Картой онлайн</label>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend class="fieldset-title">Когда доставить заказ?</legend>
+
+        <div class="form-block">
+            <button type="button" id="asap-btn" class="form__radio-btn interactive active">
+                В ближайшее время
+            </button>
+
+            <div class="input-field dateTime-input">
+                <img src="./img/form-calendar_gray.svg" alt="" class="input-field__ico gray-ico">
+                <img src="./img/form-calendar_white.svg" alt="" class="input-field__ico white-ico hide">
+
+                <input type="text" id="delivery-dateTime" name="deliveryDateTime" placeholder="Выбрать дату и время">
+
+                <input type="hidden" name="pd_d-type" id="delivery-type" value="1">
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend class="fieldset-title">Если товара нет в наличии:</legend>
+
+        <div class="custom-select" data-name="checkout-out-of-stock">
+            <div class="custom-select__trigger interactive">Связаться и согласовать замену</div>
+
+            <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/down_arrow-2.svg")" alt="" class="custom-select__ico">
+
+            <div class="custom-select__dropdown">
+                <div class="custom-select__option interactive" data-value="replace">Связаться и согласовать замену</div>
+                <div class="custom-select__option interactive" data-value="analog">Заменить товар на аналогичный</div>
+                <div class="custom-select__option interactive" data-value="skip">Пропустить отсутствующий товар</div>
+            </div>
+
+            <input type="hidden" name="pd_missing" value="replace">
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend class="fieldset-title">Промокод</legend>
+
+        <div class="form__promo-field">
+            <div class="input-field">
+                <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/form-ico-6.svg")" alt="" class="input-field__ico">
+                <input type="text" id="PaymentPromo_Input1" name="promo" class="form__promo-input" autocomplete="off">
+            </div>
+            <button class="form__promo-btn">Применить</button>
+        </div>
+    </fieldset>
+
+    @await Component.InvokeAsync(typeof(WidgetViewComponent),
+            new { widgetZone = PublicWidgetZones.OpCheckoutBillingAddressBottom, additionalData = Model })
+</div>

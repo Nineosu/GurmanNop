@@ -1,0 +1,110 @@
+﻿@model AddressModel
+
+<input asp-for="Id" type="hidden" />
+
+<div class="edit-address">
+
+    <div class="inputs input-field">
+        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/form-ico-1.svg")" class="input-field__ico">
+        <input asp-for="FirstName" class="form__input" placeholder="Имя" autocomplete="given-name" />
+        <nop-required />
+        <span asp-validation-for="FirstName"></span>
+    </div>
+
+    <div class="inputs input-field">
+        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/form-ico-1.svg")" class="input-field__ico">
+        <input asp-for="LastName" class="form__input" placeholder="Фамилия" autocomplete="family-name" />
+        <nop-required />
+        <span asp-validation-for="LastName"></span>
+    </div>
+
+    <div class="inputs input-field">
+        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/form-ico-2.svg")" class="input-field__ico">
+        <input asp-for="Email" class="form__input" placeholder="E-mail" autocomplete="email" />
+        <nop-required />
+        <span asp-validation-for="Email"></span>
+    </div>
+
+    @if (Model.PhoneEnabled)
+    {
+        <div class="inputs input-field">
+            <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/form-ico-3.svg")" class="input-field__ico">
+            <input asp-for="PhoneNumber" class="form__input" placeholder="Номер телефона" autocomplete="tel" />
+            <nop-required />
+            <span asp-validation-for="PhoneNumber"></span>
+        </div>
+    }
+
+    @if (Model.CityEnabled)
+    {
+        <div class="inputs" style="display:none;">
+            <input asp-for="City" id="BillingNewAddress_City" />
+            <span asp-validation-for="City"></span>
+        </div>
+    }
+
+    @if (Model.StreetAddressEnabled)
+    {
+        <div class="form-block">
+            <input type="radio" name="chosenCity" id="simferopol" class="form__radio-input" value="Симферополь" checked>
+            <label for="simferopol" class="form__radio-btn interactive">Симферополь</label>
+
+            <input type="radio" name="chosenCity" id="sevastopol" class="form__radio-input" value="Севастополь">
+            <label for="sevastopol" class="form__radio-btn interactive">Севастополь</label>
+
+            <input type="radio" name="chosenCity" id="yalta" class="form__radio-input" value="Ялта">
+            <label for="yalta" class="form__radio-btn interactive">Ялта</label>
+        </div>
+
+        <div class="inputs input-field">
+            <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/form-ico-4.svg")" class="input-field__ico">
+            <input asp-for="Address1" class="form__input" placeholder="Адрес" autocomplete="street-address" />
+            <nop-required />
+            <span asp-validation-for="Address1"></span>
+        </div>
+    }
+
+    @if (Model.StreetAddress2Enabled)
+    {
+        <div class="inputs input-field" style="display:none;">
+            <input asp-for="Address2" />
+            <nop-required />
+            <span asp-validation-for="Address2"></span>
+        </div>
+    }
+
+    @if (Model.CountryEnabled)
+    {
+        <div class="inputs input-field" style="display:none;">
+            <label asp-for="CountryId"></label>
+            <select asp-for="CountryId"
+                    asp-items="Model.AvailableCountries"
+                    class="form__input"
+                    data-trigger="country-select"
+                    data-url="@(Url.RouteUrl("GetStatesByCountryId"))"
+                    data-stateprovince="#@Html.IdFor(m => m.StateProvinceId)">
+            </select>
+            <nop-required />
+        </div>
+    }
+
+    @if (Model.StateProvinceEnabled)
+    {
+        <div class="inputs input-field" style="display:none;">
+            <label asp-for="StateProvinceId"></label>
+            <select asp-for="StateProvinceId"
+                    asp-items="Model.AvailableStates"
+                    class="form__input">
+            </select>
+        </div>
+    }
+
+    <div class="inputs clear">
+        <textarea id="onepagecheckout__order_comment"
+                  class="form__textarea"
+                  cols="30"
+                  rows="2"
+                  placeholder="Комментарий к заказу"></textarea>
+    </div>
+
+</div>

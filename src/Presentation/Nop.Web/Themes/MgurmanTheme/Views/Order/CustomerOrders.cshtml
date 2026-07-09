@@ -1,0 +1,233 @@
+﻿@model CustomerOrderListModel
+
+@using Nop.Core.Http;
+@using Nop.Web.Models.Customer
+@using Nop.Web.Framework.UI
+@using Nop.Core.Domain.Orders
+
+@{
+    Layout = "_ColumnsOne";
+
+    NopHtml.AddTitleParts(T("PageTitle.Account").Text);
+
+    NopHtml.AppendPageCssClassParts("html-account-page");
+    NopHtml.AppendPageCssClassParts("html-customer-orders-page");
+}
+
+
+<div class="page-layout">
+    <div class="account-page__background">
+        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account-bg-1.svg")"
+             alt=""
+             class="background-img">
+
+        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account-bg-2.svg")"
+             alt=""
+             class="background-img">
+
+        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account-bg-1.svg")"
+             alt=""
+             class="background-img">
+
+        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account-bg-1.svg")"
+             alt=""
+             class="background-img">
+
+        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account-bg-2.svg")"
+             alt=""
+             class="background-img">
+
+        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account-bg-1.svg")"
+             alt=""
+             class="background-img">
+    </div>
+
+    <div class="wrapper">
+        <div class="account-menu">
+            <div class="account-menu__top">
+                <p class="account-menu__title">
+                    Личный кабинет
+                </p>
+
+                <div class="account-menu__btns">
+                    <a href="@Url.RouteUrl("CustomerInfo")"
+                       class="account-menu__btn">
+                        Профиль
+                    </a>
+
+                    <a href="@Url.RouteUrl("CustomerChangePassword")"
+                       class="account-menu__btn">
+                        Конфиденциальность
+                    </a>
+
+                    <a href="@Url.RouteUrl("CustomerOrders")"
+                       class="account-menu__btn btn-active">
+                        История заказов
+                    </a>
+                </div>
+            </div>
+
+            <div class="account-menu__bottom">
+                <a href="/logout"
+                   class="account-menu__exit-btn">
+                    Выйти
+                </a>
+            </div>
+        </div>
+
+        <main class="main-account">
+            <div class="account-tab orders-tab">
+                <div class="orders-view orders-view__list">
+                    <p class="account-tab__title page-title">
+                        История заказов
+                    </p>
+
+                    @await Component.InvokeAsync(typeof(WidgetViewComponent),
+                    new
+                    {
+                        widgetZone = PublicWidgetZones.CustomerOrdersTop,
+                        additionalData = Model
+                    })
+
+                    <div class="orders__select">
+                        <div class="orders-select__btns">
+                            <button type="button"
+                                    class="orders-select__btn active"
+                                    data-status="all">
+                                Все
+                            </button>
+
+                            <button type="button"
+                                    class="orders-select__btn"
+                                    data-status="completed">
+                                Доставлены
+                            </button>
+
+                            <button type="button"
+                                    class="orders-select__btn"
+                                    data-status="canceled">
+                                Отменены
+                            </button>
+                        </div>
+
+                        <div class="custom-select" data-name="orders-sort">
+                            <div class="custom-select__trigger interactive">
+                                Сначала новые
+                            </div>
+
+                            <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/down_arrow-2.svg")"
+                                 alt=""
+                                 class="custom-select__ico">
+
+                            <div class="custom-select__dropdown">
+                                <div class="custom-select__option interactive"
+                                     data-value="new">
+                                    Сначала новые
+                                </div>
+
+                                <div class="custom-select__option interactive"
+                                     data-value="old">
+                                    Сначала старые
+                                </div>
+                            </div>
+
+                            <input type="hidden"
+                                   name="orders-sort"
+                                   value="new">
+                        </div>
+                    </div>
+
+                    @if (Model.Orders != null && Model.Orders.Any())
+                    {
+                        <div class="orders__list">
+                            @foreach (var order in Model.Orders)
+                            {
+                                var status =
+                                    order.OrderStatusEnum == OrderStatus.Complete
+                                        ? "completed"
+                                        : order.OrderStatusEnum == OrderStatus.Cancelled
+                                            ? "canceled"
+                                            : "pending";
+
+                                <div class="order-item"
+                                     data-status="@status"
+                                     data-id="@order.Id"
+                                     data-date="@order.CreatedOn.Ticks">
+
+                                    <div class="order-item__content">
+                                        <div class="order-item__content-top">
+                                            <p class="order-item__title">
+                                                Заказ №@order.CustomOrderNumber
+                                            </p>
+
+                                            <span class="order-item__subtitle">
+                                                @order.CreatedOn.ToString("dd MMMM yyyy HH:mm")
+                                            </span>
+
+                                            <ul class="order-item__products">
+                                                <li class="order-item__product">
+                                                    Статус:
+                                                    <span>
+                                                        @order.OrderStatus
+                                                    </span>
+                                                </li>
+                                            </ul>
+                                        </div>
+
+                                        <div class="order-item__content-bottom">
+                                            <div class="order-item__price-block">
+                                                <p class="order-item__price">
+                                                    Итого:
+                                                    <span>
+                                                        @order.OrderTotal
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="order-item__bottom">
+                                        <button type="button"
+                                                class="order-item__btn btn-more"
+                                                onclick="setLocation('@Url.RouteUrl(NopRouteNames.Standard.ORDER_DETAILS, new { orderId = order.Id })')">
+                                            Подробнее
+                                        </button>
+
+                                        <a href="@Url.Action(
+                                                                                          "ReOrder",
+                                                                                          "Order",
+                                                                                          new { orderId = order.Id })"
+                                           class="order-item__btn btn-repeat">Повторить</a>
+
+                                        @if (order.IsReturnRequestAllowed)
+                                        {
+                                            <button type="button"
+                                                    class="order-item__btn btn-return"
+                                                    onclick="setLocation('@Url.RouteUrl(NopRouteNames.Standard.RETURN_REQUEST, new { orderId = order.Id })')">
+                                                Возврат
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="orders__empty empty-block">
+                            <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/empty.svg")"
+                                 alt=""
+                                 class="orders-empty__img">
+
+                            <p class="empty-block__title">У вас пока нет заказов</p>
+
+                            <a href="@Url.Action("Catalog", "Catalog")" class="empty-block__link">В каталог</a>
+                        </div>
+                    }
+
+                    @await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.CustomerOrdersBottom, additionalData = Model })
+                </div>
+            </div>
+        </main>
+    </div>
+</div>

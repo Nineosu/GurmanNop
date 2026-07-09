@@ -1,0 +1,376 @@
+@using Nop.Core.Domain.Catalog
+@using Nop.Core.Domain.Media
+@using Nop.Core.Domain.Orders
+@using Nop.Services.Orders
+@using Nop.Core.Http
+@using Nop.Core.Domain.Payments
+@inject INopUrlHelper NopUrl
+
+@model OrderDetailsModel
+
+@inject MediaSettings mediaSettings
+
+@{
+    Layout = "_ColumnsOne";
+
+    NopHtml.AddTitleParts(T("PageTitle.OrderDetails").Text);
+
+    NopHtml.AppendPageCssClassParts("html-account-page");
+    NopHtml.AppendPageCssClassParts("html-order-details-page");
+}
+
+@{
+    var additionalFields = new Dictionary<string, string>();
+
+    if (!string.IsNullOrEmpty(Model.BillingAddress?.Address2))
+    {
+        var fields = Model.BillingAddress.Address2.Split("; ");
+
+        foreach (var field in fields)
+        {
+            var separatorIndex = field.IndexOf(':');
+
+            if (separatorIndex > 0)
+            {
+                var key = field.Substring(0, separatorIndex).Trim();
+                var value = field.Substring(separatorIndex + 1).Trim();
+
+                additionalFields[key] = value;
+            }
+        }
+    }
+
+    additionalFields.TryGetValue("Метод оплаты", out var customPaymentMethod);
+    additionalFields.TryGetValue("Доставить заказ", out var customDeliveryMethod);
+    additionalFields.TryGetValue("При отсутствии товара", out var missingProductAction);
+    additionalFields.TryGetValue("Промокод", out var promoCode);
+    additionalFields.TryGetValue("Комментарий к заказу", out var orderComment);
+}
+
+<div class="page-layout">
+    <div class="account-page__background">
+        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account-bg-1.svg")" alt="" class="background-img">
+        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account-bg-2.svg")" alt="" class="background-img">
+        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account-bg-1.svg")" alt="" class="background-img">
+        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account-bg-1.svg")" alt="" class="background-img">
+        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account-bg-2.svg")" alt="" class="background-img">
+        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account-bg-1.svg")" alt="" class="background-img">
+    </div>
+
+    <div class="wrapper">
+        <div class="account-menu">
+            <div class="account-menu__top">
+                <p class="account-menu__title">
+                    Личный кабинет
+                </p>
+
+                <div class="account-menu__btns">
+                    <a href="@Url.RouteUrl("CustomerInfo")"
+                       class="account-menu__btn">
+                        Профиль
+                    </a>
+
+                    <a href="@Url.RouteUrl("CustomerChangePassword")"
+                       class="account-menu__btn">
+                        Конфиденциальность
+                    </a>
+
+                    <a href="@Url.RouteUrl("CustomerOrders")"
+                       class="account-menu__btn btn-active">
+                        История заказов
+                    </a>
+                </div>
+            </div>
+
+            <div class="account-menu__bottom">
+                <a href="/logout"
+                   class="account-menu__exit-btn">
+                    Выйти
+                </a>
+            </div>
+        </div>
+
+        <main class="main-account">
+            <div class="account-tab orders-tab">
+                <div class="orders-view orders-view__details show">
+                    @await Component.InvokeAsync(typeof(WidgetViewComponent), new {widgetZone = PublicWidgetZones.OrderDetailsPageTop, additionalData = Model})
+
+                    <div class="order-details__top">
+                        <div class="order-details__top-info">
+                            <button type="button"
+                                    class="order-details__back"
+                                    onclick="setLocation('@Url.RouteUrl("CustomerOrders")')">
+                                < К списку заказов
+                                </button>
+
+                                <p class="order-details__title page-title">
+                                    Заказ №@Model.CustomOrderNumber
+                                </p>
+
+                                <p class="order-details__date">
+                                    <span>
+                                        @Model.CreatedOn.ToString("dd MMMM yyyy")
+                                    </span>
+
+                                    <span>
+                                        @Model.CreatedOn.ToString("HH:mm")
+                                    </span>
+                                </p>
+                            </div>
+
+                            <div class="order-details__top-btns">
+                                @if (Model.IsReOrderAllowed)
+                                {
+                                    <a href="@Url.RouteUrl(NopRouteNames.Standard.RE_ORDER, new { orderId = Model.Id })" class="order-details__btn repeat-btn">
+                                        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/order-repeat.svg")"
+                                             alt="">
+                                        <span>
+                                            Повторить заказ
+                                        </span>
+                                    </a>
+                                }
+
+                                @if (!Model.PdfInvoiceDisabled)
+                                {
+                                    <a href="@Url.RouteUrl(NopRouteNames.Standard.GET_ORDER_PDF_INVOICE, new { orderId = Model.Id })"
+                                       class="order-details__btn download-btn">
+                                        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/order-check.svg")"
+                                             alt="">
+                                        <span>
+                                            Скачать чек
+                                        </span>
+                                    </a>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="order-details__products">
+                            <p class="order-details__products-title">Состав заказа</p>
+
+                            <div class="order-details__products-list">
+                                @foreach (var item in Model.Items)
+                                {
+                                    <div class="order-details__product-item">
+                                        <div class="product-item__block">
+                                            <a href="@(await NopUrl.RouteGenericUrlAsync<Product>(new { SeName = item.ProductSeName }))">
+                                                <img src="@(string.IsNullOrEmpty(item.Picture.ImageUrl) ? Url.Content("~/images/default-image.png") : item.Picture.ImageUrl)"
+                                                     alt="@item.Picture.AlternateText"
+                                                     class="product-item__img">
+                                            </a>
+
+                                            <div>
+                                                @if (!Model.PrintMode)
+                                                {
+                                                    <p class="product-item__title">
+                                                        <a href="@(await NopUrl.RouteGenericUrlAsync<Product>(new { SeName = item.ProductSeName }))">
+                                                            @item.ProductName
+                                                        </a>
+                                                    </p>
+                                                }
+                                                else
+                                                {
+                                                    <p class="product-item__title">@item.ProductName</p>
+                                                }
+
+                                                @if (!string.IsNullOrEmpty(item.AttributeInfo))
+                                                {
+                                                    <span class="product-item__subtitle">
+                                                        @Html.Raw(item.AttributeInfo)
+                                                    </span>
+                                                }
+
+                                                @if (!string.IsNullOrEmpty(item.RentalInfo))
+                                                {
+                                                    <span class="product-item__subtitle">
+                                                        @Html.Raw(item.RentalInfo)
+                                                    </span>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <div class="product-item__block">
+                                            <p class="product-item__amount">
+                                                <span class="amount">@item.Quantity</span>
+                                                *
+                                                <span class="price">@item.UnitPrice</span>
+                                            </p>
+                                        </div>
+
+                                        <div class="product-item__block">
+                                            <p class="product-item__price">@item.SubTotal</p>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="order-details__products-bottom">
+                                <div class="order-details__products-bottom-block">
+                                    <p class="order-details__bottom-title">
+                                        Товары (@Model.Items.Count)
+                                    </p>
+                                    <p class="order-details__bottom-price">
+                                        @Model.OrderSubtotal
+                                    </p>
+                                </div>
+
+                                @if (Model.IsShippable)
+                                {
+                                    <div class="order-details__products-bottom-block">
+                                        <p class="order-details__bottom-title">Доставка</p>
+                                        <p class="order-details__bottom-price">@Model.OrderShipping</p>
+                                    </div>
+                                }
+
+                                <div class="order-details__products-bottom-block">
+                                    <p class="order-details__bottom-result-title">
+                                        ИТОГО:
+                                    </p>
+                                    <p class="order-details__bottom-result-price">
+                                        @Model.OrderTotal
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        @await Component.InvokeAsync(typeof(WidgetViewComponent), new {widgetZone = PublicWidgetZones.OrderDetailsPageAfterproducts, additionalData = Model})
+
+                        <div class="order-details__info">
+                            <div class="order-details__info-card">
+                                <p class="order-details__info-title">
+                                    Доставка
+                                </p>
+
+                                @if (Model.IsShippable && Model.ShippingAddress != null)
+                                {
+                                    <div class="order-details__info-block">
+                                        <p class="order-details__block-title">Адрес</p>
+                                        <p class="order-details__block-subtitle">
+                                            @foreach (var addressField in Model.ShippingAddress.AddressFields)
+                                            {
+                                                @addressField.Value
+                                                <br />
+                                            }
+                                        </p>
+                                    </div>
+                                }
+
+                                @if (!string.IsNullOrEmpty(customDeliveryMethod))
+                                {
+                                    <div class="order-details__info-block">
+                                        <p class="order-details__block-title">
+                                            Способ
+                                        </p>
+
+                                        <p class="order-details__block-subtitle">
+                                            @customDeliveryMethod
+                                        </p>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(missingProductAction))
+                                {
+                                    <div class="order-details__info-block">
+                                        <p class="order-details__block-title">
+                                            Если товара нет
+                                        </p>
+
+                                        <p class="order-details__block-subtitle">
+                                            @missingProductAction
+                                        </p>
+                                    </div>
+                                }
+
+                                <div class="order-details__info-block">
+                                    <p class="order-details__block-title">Дата и время</p>
+                                    <p class="order-details__block-subtitle">
+                                        @Model.CreatedOn.ToString("dd MMMM yyyy HH:mm")
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="order-details__info-card">
+                                <p class="order-details__info-title">
+                                    Оплата
+                                </p>
+
+                                @if (!string.IsNullOrEmpty(customPaymentMethod))
+                                {
+                                    <div class="order-details__info-block">
+                                        <p class="order-details__block-title">
+                                            Способ
+                                        </p>
+
+                                        <p class="order-details__block-subtitle">
+                                            @customPaymentMethod
+                                        </p>
+                                    </div>
+                                }
+
+                                @{
+                                    var paymentStatusClass = Model.PaymentStatus switch
+                                    {
+                                        PaymentStatus.Paid => "status-paid",
+                                        PaymentStatus.Pending => "status-pending",
+                                        PaymentStatus.Authorized => "status-pending",
+                                        PaymentStatus.Voided => "status-declined",
+                                        PaymentStatus.Refunded => "status-declined",
+                                        PaymentStatus.PartiallyRefunded => "status-declined",
+                                        _ => "status-pending"
+                                    };
+                                }
+
+                                <div class="order-details__info-block">
+                                    <p class="order-details__block-title">
+                                        Статус
+                                    </p>
+                                    <span class="order-details__payment-status @paymentStatusClass">
+                                        @Model.PaymentMethodStatus
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="order-details__info-card">
+                                <p class="order-details__info-title">
+                                    Получатель
+                                </p>
+
+                                @if (Model.BillingAddress != null)
+                                {
+                                    <div class="order-details__info-block">
+                                        <p class="order-details__block-title">
+                                            ФИО
+                                        </p>
+                                        <p class="order-details__block-subtitle">
+                                            @Model.BillingAddress.FirstName @Model.BillingAddress.LastName
+                                        </p>
+                                    </div>
+
+                                    @if (Model.BillingAddress.PhoneEnabled)
+                                    {
+                                        <div class="order-details__info-block">
+                                            <p class="order-details__block-title">
+                                                Номер телефона
+                                            </p>
+                                            <p class="order-details__block-subtitle">
+                                                @Model.BillingAddress.PhoneNumber
+                                            </p>
+                                        </div>
+                                    }
+
+                                    <div class="order-details__info-block">
+                                        <p class="order-details__block-title">
+                                            E-mail
+                                        </p>
+                                        <p class="order-details__block-subtitle">
+                                            @Model.BillingAddress.Email
+                                        </p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        @await Component.InvokeAsync(typeof(WidgetViewComponent), new {widgetZone = PublicWidgetZones.OrderDetailsPageBottom, additionalData = Model})
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>

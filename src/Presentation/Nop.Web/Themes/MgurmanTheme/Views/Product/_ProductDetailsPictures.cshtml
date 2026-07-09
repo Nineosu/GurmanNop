@@ -1,0 +1,48 @@
+﻿@model ProductDetailsModel
+
+<img src="@Model.DefaultPictureModel.ImageUrl"
+     alt="@Model.DefaultPictureModel.AlternateText"
+     title="@Model.DefaultPictureModel.Title"
+     class="product-card__img"
+     id="main-product-image" />
+
+@if (Model.PictureModels.Count > 1)
+{
+    <div class="product-card__thumbs">
+
+        @foreach (var picture in Model.PictureModels)
+        {
+            <button type="button"
+                    class="product-card__thumb">
+
+                <img src="@picture.ThumbImageUrl"
+                     alt="@picture.AlternateText"
+                     title="@picture.Title"
+                     data-full="@picture.ImageUrl" />
+
+            </button>
+        }
+
+    </div>
+}
+
+<script asp-location="Footer">
+    document.addEventListener("DOMContentLoaded", function () {
+
+    const mainImage = document.getElementById("main-product-image");
+
+    document.querySelectorAll(".product-card__thumb img")
+    .forEach(img => {
+
+    img.addEventListener("click", function () {
+
+    mainImage.src = this.dataset.full;
+    mainImage.alt = this.alt;
+    mainImage.title = this.title;
+
+    });
+
+    });
+
+    });
+</script>

@@ -1,0 +1,120 @@
+﻿@using static Nop.Services.Common.NopLinksDefaults
+
+<section class="footer-banner">
+    <div class="wrapper">
+        <div class="banner__wrapper">
+            <img src="./img/banner-ico.svg" alt="" class="banner__img">
+            <p class="banner__text">Возникли вопросы? Свяжитесь с нами или закажите обратный звонок</p>
+            <a href="tel:+79789858852" class="banner__tel">+7 978 985 88 52</a>
+        </div>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="wrapper">
+        <div class="footer__wrapper">
+            <div class="footer__top">
+                <div class="footer__block">
+                    <p class="footer__block-title">Информация</p>
+                    <ul class="footer__list">
+                        <li class="footer__list-item">
+                            <a href="#!">Доставка и оплата</a>
+                        </li>
+                        <li class="footer__list-item">
+                            <a href="#!">Документы</a>
+                        </li>
+                        <li class="footer__list-item">
+                            <a href="#!">Как мы работаем</a>
+                        </li>
+                        <li class="footer__list-item">
+                            <a href="#!">О компании</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="footer__block">
+                    <p class="footer__block-title">Сервисы</p>
+                    <ul class="footer__list">
+                        <li class="footer__list-item">
+                            <a href="#!">Поиск</a>
+                        </li>
+                        <li class="footer__list-item">
+                            <a href="#!">Новости</a>
+                        </li>
+                        <li class="footer__list-item">
+                            <a href="#!">Последние</a>
+                        </li>
+                        <li class="footer__list-item">
+                            <a href="#!">Новинки</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="footer__block">
+                    <p class="footer__block-title">Личный кабинет</p>
+                    <ul class="footer__list">
+                        <li class="footer__list-item">
+                            <a href="#!">Личный кабинет</a>
+                        </li>
+                        <li class="footer__list-item">
+                            <a href="#!">Заказы</a>
+                        </li>
+                        <li class="footer__list-item">
+                            <a href="#!">Адреса</a>
+                        </li>
+                        <li class="footer__list-item">
+                            <a href="#!">Корзина</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="footer__block">
+                    <p class="footer__block-title">Контакты</p>
+                    <ul class="footer__list">
+                        <li class="footer__list-item">
+                            <a href="tel:+79789858852">+7 978 985 88 52</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer__bottom">
+                <div class="footer__block">
+                    <p class="footer__block-title small-title">Мобильное приложение</p>
+
+                    <div class="footer__block-cards app-cards">
+                        <a href="#!">
+                            <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/appstore.png")" alt="App store" class="footer__card-img">
+                        </a>
+                        <a href="#!">
+                            <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/googleplay.png")" alt="Google play" class="footer__card-img">
+                        </a>
+                    </div>
+                </div>
+                <div class="footer__block">
+                    <p class="footer__block-title small-title">Получайте новости об акциях на почту</p>
+
+                    <form action="" class="footer__form" id="footer-form">
+                        <input type="email" id="email" name="email" class="footer__input" placeholder="E-mail" autocomplete="email">
+                    </form>
+                </div>
+                <div class="footer__block">
+                    <p class="footer__block-title small-title">Способы оплаты</p>
+
+                    <div class="footer__block-cards payment-cards">
+                        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/visa.png")" alt="Visa" class="footer__card-img">
+                        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/mastercard.png")" alt="Mastercard" class="footer__card-img">
+                        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/mir.png")" alt="Мир" class="footer__card-img">
+                        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/rncb.png")" alt="Рнкб" class="footer__card-img">
+                    </div>
+                </div>
+            </div>
+            <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/logo.svg")" alt="" class="footer__logo">
+            <p class="footer__copyright">Приведённые цены и характеристики товаров носят исключительно ознакомительный характер и не являются публичной офертой.</p>
+            @if (!Model.HidePoweredByNopCommerce)
+            {
+                <div class="footer-powered-by footer__copyright" style="margin-top: 20px">
+                    @*Would you like to remove the "Powered by nopCommerce" link in the bottom of the footer?
+                    Please find more info at https://www.nopcommerce.com/nopcommerce-copyright-removal-key*@
+                    Powered by <a href="@(OfficialSite.Main)" target="_blank" @(Model.IsHomePage ? string.Empty : "rel=nofollow")>nopCommerce</a>
+                </div>
+            }
+        </div>
+    </div>
+</footer>

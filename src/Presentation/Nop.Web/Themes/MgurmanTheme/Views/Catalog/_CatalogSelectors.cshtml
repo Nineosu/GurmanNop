@@ -1,0 +1,59 @@
+﻿@model CatalogProductsModel
+
+@if (Model.Products.Count <= 0 &&
+     !Model.PriceRangeFilter.Enabled &&
+     !Model.SpecificationFilter.Enabled &&
+     !Model.ManufacturerFilter.Enabled)
+{
+    return;
+}
+
+@{
+    var selectedValue = Context.Request.Query["orderby"].ToString();
+    var isDefaultSort = string.IsNullOrEmpty(selectedValue);
+
+    if (isDefaultSort)
+    {
+        selectedValue = "11";
+    }
+}
+
+<div class="product__filters">
+
+    @if (Model.AllowProductSorting)
+    {
+        <div class="filters__block">
+
+            <span class="filters__label">Сортировать по:</span>
+
+            <div class="select" data-sort-select>
+
+                <button class="select__trigger" type="button" data-trigger>
+                    <p data-current-sort>
+                        <span>Цене</span>: По убыванию
+                    </p>
+                </button>
+
+                <ul class="select__dropdown" data-dropdown>
+
+                    <li data-value="11"><span>Цене</span>: По убыванию</li>
+                    <li data-value="10"><span>Цене</span>: По возрастанию</li>
+                    <li data-value="5">Популярности</li>
+                    <li data-value="15">Новизне</li>
+
+                </ul>
+
+                <img src="~/Themes/MgurmanTheme/Content/images/down_arrow.svg"
+                     class="select__ico" />
+
+            </div>
+
+            <input type="hidden"
+                   id="products-orderby"
+                   value="@selectedValue"
+                   data-default="@isDefaultSort" />
+
+        </div>
+    }
+
+</div>

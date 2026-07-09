@@ -1,0 +1,236 @@
+@model ShoppingCartModel
+
+@using Nop.Core
+@using Nop.Core.Domain.Catalog
+@using Nop.Core.Domain.Media
+@using Nop.Core.Domain.Orders
+@using Nop.Core.Domain.Tax
+@using Nop.Core.Http
+@using System.Globalization
+
+@inject IWebHelper webHelper
+@inject IWorkContext workContext
+@inject MediaSettings mediaSettings
+@inject OrderSettings orderSettings
+@inject INopUrlHelper NopUrl
+
+<div class="order-summary-content">
+
+    @await Component.InvokeAsync(typeof(WidgetViewComponent),
+        new { widgetZone = PublicWidgetZones.OrderSummaryContentBefore, additionalData = Model })
+
+    @await Html.PartialAsync("_OrderReviewData", Model.OrderReviewData)
+
+    @if (Model.Items.Count > 0)
+    {
+        if (Model.Warnings.Count > 0)
+        {
+            <div class="message-error">
+                <ul>
+                    @foreach (var warning in Model.Warnings)
+                    {
+                        <li>@warning</li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <form asp-route="@NopRouteNames.General.CART"
+              method="post"
+              enctype="multipart/form-data"
+              id="shopping-cart-form">
+
+            <section class="cart-section">
+                <p class="cart__title page-title">@T("ShoppingCart")</p>
+
+                <div class="cart__content page-content">
+
+                    <div class="cart__products">
+
+                        <div class="cart__products-top">
+                            <span>Продукт</span>
+                            <span>Цена</span>
+                            <span>Кол-во</span>
+                            <span>Итог</span>
+                        </div>
+
+                        <div class="cart__products-list">
+
+                            @foreach (var item in Model.Items)
+                            {
+                                var isWeightProduct = item.UnitType == "kg";
+
+                                var quantityValue = item.Quantity;
+
+                                var displayValue = item.Quantity.ToString("0");
+
+                                if (isWeightProduct && !string.IsNullOrEmpty(item.AttributeInfo))
+                                {
+                                    var match = System.Text.RegularExpressions.Regex.Match(
+                                       item.AttributeInfo,
+                                       @"Вес:\s*([\d\s]+(?:[.,]\d+)?)\s*(гр|кг)"
+                                   );
+
+                                    if (match.Success)
+                                    {
+                                        var numberString = match.Groups[1].Value.Replace(" ", "").Replace(",", ".");
+
+                                        if (decimal.TryParse(numberString, NumberStyles.Any, CultureInfo.InvariantCulture, out var number))
+                                        {
+                                            var unit = match.Groups[2].Value;
+
+                                            if (unit == "гр")
+                                                number /= 1000m;
+
+                                            displayValue = number.ToString("0.0", CultureInfo.InvariantCulture);
+                                        }
+                                    }
+                                }
+
+                                var unitDisplay = isWeightProduct ? "кг" : "шт";
+
+                                <div class="product-item" data-id="@item.Id">
+
+                                    <div class="product-item__product-info">
+
+                                        <button type="button"
+                                                class="product-item__remove-btn"
+                                                onclick="document.getElementById('remove-@item.Id').checked = true; document.getElementById('updatecart').click();">
+                                            <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/cross.svg")" alt="Удалить">
+                                        </button>
+
+                                        @if (Model.ShowProductImages)
+                                        {
+                                            <div class="product-item__image">
+                                                <img src="@item.Picture.ImageUrl"
+                                                     class="product-item__img"
+                                                     alt="@item.Picture.AlternateText" />
+                                            </div>
+                                        }
+
+                                        <p class="product-item__title">
+                                            <a href="@(await NopUrl.RouteGenericUrlAsync<Product>(
+                                                                                               new { SeName = item.ProductSeName }))">
+                                                @item.ProductName
+                                            </a>
+                                        </p>
+
+                                    </div>
+
+                                    <p class="product-item__price">
+                                        @item.UnitPrice
+                                    </p>
+
+                                    <div class="product-card__counter product-counter"
+                                         data-product-id="@item.Id"
+                                         data-unit="@(isWeightProduct ? "kg" : "piece")"
+                                         data-step="@(isWeightProduct ? "0.1" : "1")"
+                                         data-min="@(isWeightProduct ? "0.1" : "1")"
+                                         data-max="@(isWeightProduct ? "2" : "99")"
+                                         data-cart-item="true"
+                                         data-current-value="@displayValue">
+
+                                        <button type="button" class="counter-btn counter-block btn-minus"></button>
+
+                                        <div class="counter-block counter__value-block">
+                                            <input type="text"
+                                                   class="counter-value"
+                                                   value="@displayValue"
+                                                   inputmode="@(isWeightProduct ? "decimal" : "numeric")"
+                                                   @(isWeightProduct ? "readonly" : "")>
+                                            <span class="counter-unit">@unitDisplay</span>
+                                        </div>
+
+                                        <button type="button" class="counter-btn counter-block btn-plus"></button>
+
+                                    </div>
+
+                                    <p class="product-item__total">
+                                        @item.SubTotal
+                                    </p>
+
+                                    <input type="checkbox"
+                                           id="remove-@item.Id"
+                                           name="removefromcart"
+                                           value="@item.Id"
+                                           hidden />
+
+                                    <input type="hidden"
+                                           name="itemquantity@(item.Id)"
+                                           class="cart-item-quantity-hidden"
+                                           value="@displayValue" />
+
+                                </div>
+                            }
+
+                        </div>
+
+                        <div class="cart__products-bottom">
+                            <button type="submit"
+                                    name="updatecart"
+                                    id="updatecart"
+                                    class="cart__products-clear-btn"
+                                    style="display: none;">
+                                @T("ShoppingCart.UpdateCart")
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <div class="cart__paycheck">
+
+                        <div class="cart__paycheck-content">
+
+                            @await Component.InvokeAsync(typeof(OrderTotalsViewComponent),
+                                new { isEditable = Model.IsEditable })
+
+                            <div class="cart__paycheck-btns">
+
+                                @if (string.IsNullOrEmpty(Model.MinOrderSubtotalWarning) && !Model.HideCheckoutButton)
+                                {
+                                    if (!orderSettings.CheckoutDisabled)
+                                    {
+                                        <button type="submit"
+                                                id="checkout"
+                                                name="checkout"
+                                                value="checkout"
+                                                class="cart__paycheck-btn checkout-btn">
+                                            @T("Checkout.Button")
+                                        </button>
+                                    }
+                                }
+
+                                <a href="@Url.Content("~/")"
+                                   class="cart__paycheck-btn back-btn">
+                                    @T("ShoppingCart.ContinueShopping")
+                                </a>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+        </form>
+    }
+    else
+    {
+        <div class="cart__empty-block empty-block">
+            <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/empty.svg")"
+                 alt=""
+                 class="orders-empty__img">
+
+            <p class="empty-block__title">
+                @T("ShoppingCart.CartIsEmpty")
+            </p>
+
+            <a href="@Url.RouteUrl("Homepage")"
+               class="empty-block__link">
+                В каталог
+            </a>
+        </div>
+    }
+
+</div>

@@ -1,0 +1,108 @@
+﻿@model OrderTotalsModel
+
+<div class="cart__paycheck-header">
+    <p class="cart__paycheck-title main-title">
+        Доставка
+    </p>
+</div>
+
+<div class="cart__paycheck-blocks">
+
+    <div class="cart__paycheck-block">
+        <p class="cart__paycheck-title red-title">
+            Симферополь
+        </p>
+
+        <div class="cart__paycheck-line">
+            <p class="cart__paycheck-subtitle">До 1000₽</p>
+            <p class="cart__paycheck-title">298 ₽</p>
+        </div>
+
+        <div class="cart__paycheck-line">
+            <p class="cart__paycheck-subtitle">До 3000₽</p>
+            <p class="cart__paycheck-title">99 ₽</p>
+        </div>
+
+        <div class="cart__paycheck-line">
+            <p class="cart__paycheck-subtitle">От 3000₽</p>
+            <p class="cart__paycheck-title">Бесплатно</p>
+        </div>
+
+        <div class="cart__paycheck-line">
+            <p class="cart__paycheck-subtitle">Экспресс</p>
+            <p class="cart__paycheck-title">+160 ₽</p>
+        </div>
+    </div>
+
+    <div class="cart__paycheck-block">
+        <p class="cart__paycheck-title red-title">
+            Севастополь
+        </p>
+
+        <div class="cart__paycheck-line">
+            <p class="cart__paycheck-subtitle">До 1000₽</p>
+            <p class="cart__paycheck-title">300 ₽</p>
+        </div>
+
+        <div class="cart__paycheck-line">
+            <p class="cart__paycheck-subtitle">До 3000₽</p>
+            <p class="cart__paycheck-title">120 ₽</p>
+        </div>
+
+        <div class="cart__paycheck-line">
+            <p class="cart__paycheck-subtitle">От 3000₽</p>
+            <p class="cart__paycheck-title">Бесплатно</p>
+        </div>
+
+        <div class="cart__paycheck-line">
+            <p class="cart__paycheck-subtitle">Экспресс</p>
+            <p class="cart__paycheck-title">+180 ₽</p>
+        </div>
+    </div>
+
+    <div class="cart__paycheck-block">
+        <p class="cart__paycheck-title red-title">
+            Ялта
+        </p>
+
+        <div class="cart__paycheck-line">
+            <p class="cart__paycheck-subtitle">До 1000₽</p>
+            <p class="cart__paycheck-title">298 ₽</p>
+        </div>
+
+        <div class="cart__paycheck-line">
+            <p class="cart__paycheck-subtitle">До 3000₽</p>
+            <p class="cart__paycheck-title">120 ₽</p>
+        </div>
+
+        <div class="cart__paycheck-line">
+            <p class="cart__paycheck-subtitle">От 3000₽</p>
+            <p class="cart__paycheck-title">Бесплатно</p>
+        </div>
+
+        <div class="cart__paycheck-line">
+            <p class="cart__paycheck-subtitle">Экспресс</p>
+            <p class="cart__paycheck-title">+180 ₽</p>
+        </div>
+    </div>
+
+</div>
+
+<div class="cart__paycheck-bottom">
+
+    <p class="cart__paycheck-title">
+        Итого:
+    </p>
+
+    <p class="cart__paycheck-total">
+        @if (!string.IsNullOrEmpty(Model.OrderTotal))
+        {
+            @Model.OrderTotal
+        }
+        else
+        {
+            @T("ShoppingCart.Totals.CalculatedDuringCheckout")
+        }
+    </p>
+
+</div>

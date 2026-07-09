@@ -1,0 +1,15 @@
+﻿@model CatalogProductsModel
+
+@if (Model.Products.Count > 0)
+{
+    <div class="catalog__products-list">
+
+        @foreach (var product in Model.Products)
+        {
+            <div class="product__card">
+                @await Html.PartialAsync("_ProductBox", product)
+            </div>
+        }
+
+    </div>
+}
