@@ -1,0 +1,43 @@
+﻿@model CatalogProductsModel
+
+@{
+    Layout = "_ColumnsOne";
+}
+
+<div class="page-layout">
+    <div class="wrapper">
+
+        <div class="categories-aside">
+            @await Component.InvokeAsync("SidebarCategories")
+        </div>
+
+        <main class="main-catalog">
+
+            <section class="catalog-section">
+
+                <p class="products__block-title page-title">
+                    Популярные товары
+                </p>
+
+                <div class="catalog-section__block">
+
+                    @await Html.PartialAsync(
+                        "_CatalogSelectors",
+                        Model)
+
+                    <div class="catalog__products">
+
+                        @await Html.PartialAsync(
+                            "_CatalogProducts",
+                            Model)
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+</div>

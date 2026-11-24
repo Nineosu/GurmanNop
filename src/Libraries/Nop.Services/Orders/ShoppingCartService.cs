@@ -1930,7 +1930,8 @@ public partial class ShoppingCartService : IShoppingCartService
     /// </returns>
     public virtual async Task<bool> ShoppingCartRequiresShippingAsync(IList<ShoppingCartItem> shoppingCart)
     {
-        return await shoppingCart.AnyAwaitAsync(async shoppingCartItem => await _shippingService.IsShipEnabledAsync(shoppingCartItem));
+        return false;
+        //return await shoppingCart.AnyAwaitAsync(async shoppingCartItem => await _shippingService.IsShipEnabledAsync(shoppingCartItem));
     }
 
     /// <summary>

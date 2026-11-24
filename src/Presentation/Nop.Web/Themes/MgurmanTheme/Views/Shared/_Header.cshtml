@@ -1,4 +1,16 @@
-﻿@using Nop.Core.Http
+﻿@using Nop.Core.Domain.Orders
+@using Nop.Core.Http
+@using Nop.Services.Orders
+
+@inject IShoppingCartService shoppingCartService
+@inject IWorkContext workContext
+@inject IStoreContext storeContext
+
+@{
+    var cart = await shoppingCartService.GetShoppingCartAsync(await workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, storeContext.GetCurrentStore().Id);
+    var cartCount = cart.Sum(item => item.Quantity);
+}
+
 
 <header class="header">
     <div class="wrapper">
@@ -92,15 +104,21 @@
                     </div>
                     <p class="header__btn-text">Профиль</p>
                 </a>
-                <a href="./favorites.html" class="header__btn">
+                <a asp-route="@NopRouteNames.General.WISHLIST" class="header__btn">
                     <div class="header__btn-top">
-                        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/favorites.svg")" alt="" class="header__btn-img">
+                        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/favorites.svg")"
+                             alt=""
+                             class="header__btn-img">
                     </div>
                     <p class="header__btn-text">Избранное</p>
                 </a>
                 <a href="@Url.RouteUrl(NopRouteNames.General.CART)" class="header__btn">
                     <div class="header__btn-top">
                         <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/cart.svg")" alt="" class="header__btn-img">
+                        @if (cartCount > 0)
+                        {
+                            <span class="cart-badge">@cartCount</span>
+                        }
                     </div>
                     <p class="header__btn-text">Корзина</p>
                 </a>

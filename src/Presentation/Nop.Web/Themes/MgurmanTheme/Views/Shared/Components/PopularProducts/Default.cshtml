@@ -3,7 +3,9 @@
 <div class="products__block">
     <div class="products__block-top">
         <p class="products__block-title page-title">@Model.Title</p>
-        <a href="#!" class="products__block-link">Смотреть все</a>
+        <a href="@Url.Action("Popular", "Catalog")" class="products__block-link">
+            Смотреть все
+        </a>
     </div>
 
     <div class="products__list products-slider">

@@ -88,7 +88,9 @@ function initSliders() {
 
 function initCounters(root = document) {
 
-  const counters = root.querySelectorAll(".product-counter:not([data-cart-item])");
+  const counters = root.querySelectorAll(
+    ".product-counter:not([data-cart-item])"
+  );
 
   counters.forEach(counter => {
 
@@ -110,12 +112,21 @@ function initCounters(root = document) {
     if (!btnMinus || !btnPlus || !input)
       return;
 
-    let value = parseFloat(
-      String(input.value).replace(",", ".")
-    );
+
+    function parseNumber(value) {
+
+      if (typeof value === "string")
+        value = value.replace(",", ".");
+
+      return parseFloat(value);
+    }
+
+
+    let value = parseNumber(input.value);
 
     if (isNaN(value))
       value = min;
+
 
     function clamp(v) {
 
@@ -131,64 +142,76 @@ function initCounters(root = document) {
       return v;
     }
 
-    function syncWeightRadio(weight) {
+
+    function getWeightFromText(text) {
+
+      text = text
+        .toLowerCase()
+        .replace(/\s+/g, " ")
+        .trim();
+
+      let kg = 0;
+      let grams = 0;
+
+      const kgMatch = text.match(/([\d.,]+)\s*кг/);
+      const gramMatch = text.match(/([\d.,]+)\s*гр/);
+
+      if (kgMatch)
+        kg = parseFloat(kgMatch[1].replace(",", "."));
+
+      if (gramMatch)
+        grams = parseFloat(
+          gramMatch[1].replace(",", ".")
+        ) / 1000;
+
+      return kg + grams;
+    }
+
+
+    function syncWeightSelect(weight) {
 
       if (!isWeight)
         return;
 
-      const radios = document.querySelectorAll(
-        '.attributes input[type="radio"][name^="product_attribute_"]'
-      );
-
-      for (const radio of radios) {
-
-        const label = document.querySelector(
-          `label[for="${radio.id}"]`
+      const selects = counter
+        .closest("form")
+        ?.querySelectorAll(
+          '.product-attributes-hidden select[name^="product_attribute_"]'
         );
 
-        if (!label)
-          continue;
+      if (!selects || selects.length === 0)
+        return;
 
-        const text = label.textContent
-          .replace(/\[.*?\]/g, "")
-          .trim();
 
-        let radioWeight = 0;
+      for (const select of selects) {
 
-        if (text.includes("кг")) {
+        for (const option of select.options) {
 
-          radioWeight = parseFloat(
-            text
-              .replace("кг", "")
-              .replace(/\s/g, "")
-              .replace(",", ".")
-          );
+          const optionWeight =
+            getWeightFromText(option.textContent);
 
-        } else {
+          if (
+            !isNaN(optionWeight) &&
+            Math.abs(optionWeight - weight) < 0.0001
+          ) {
 
-          radioWeight =
-            parseFloat(
-              text
-                .replace("гр", "")
-                .replace(/\s/g, "")
-                .replace(",", ".")
-            ) / 1000;
-        }
+            if (select.value !== option.value) {
 
-        if (Math.abs(radioWeight - weight) < 0.001) {
+              select.value = option.value;
 
-          radio.checked = true;
+              select.dispatchEvent(
+                new Event("change", {
+                  bubbles: true
+                })
+              );
+            }
 
-          radio.dispatchEvent(
-            new Event("change", {
-              bubbles: true
-            })
-          );
-
-          break;
+            return;
+          }
         }
       }
     }
+
 
     function render(triggerEvents) {
 
@@ -196,14 +219,19 @@ function initCounters(root = document) {
 
       if (isWeight) {
 
+        value = Math.round(value * 10) / 10;
+
         input.value = value.toFixed(1);
-        syncWeightRadio(value);
+
+        syncWeightSelect(value);
 
       } else {
 
         value = Math.trunc(value);
+
         input.value = value;
       }
+
 
       if (triggerEvents) {
 
@@ -221,12 +249,14 @@ function initCounters(root = document) {
       }
     }
 
+
     btnPlus.addEventListener("click", () => {
 
       value += step;
 
       render(true);
     });
+
 
     btnMinus.addEventListener("click", () => {
 
@@ -235,14 +265,21 @@ function initCounters(root = document) {
       render(true);
     });
 
+
     input.addEventListener("blur", () => {
 
-      value = parseFloat(
-        String(input.value).replace(",", ".")
-      );
+      value = parseNumber(input.value);
 
       render(true);
     });
+
+
+    input.addEventListener("keydown", e => {
+
+      if (e.key === "Enter")
+        e.preventDefault();
+    });
+
 
     render(false);
   });
@@ -494,94 +531,6 @@ function initSelectOutsideClick() {
   });
 }
 
-// pagination
-
-function initPagination() {
-  const container = qs('.products__pagination');
-  if (!container) return;
-
-  const totalProducts = parseInt(container.dataset.totalProducts, 10) || 120;
-  const perPage = parseInt(container.dataset.perPage, 10) || 12;
-  const totalPages = Math.max(1, Math.ceil(totalProducts / perPage));
-
-  const urlParams = new URLSearchParams(window.location.search);
-  let currentPage = parseInt(urlParams.get('page'), 10) || 1;
-  currentPage = Math.min(totalPages, Math.max(1, currentPage));
-
-  renderPagination();
-
-  function renderPagination() {
-    container.innerHTML = '';
-
-    container.appendChild(createBtn('«', 1, currentPage === 1));
-    container.appendChild(createBtn('‹', currentPage - 1, currentPage === 1));
-
-    let start = Math.max(1, currentPage - 1);
-    let end = Math.min(totalPages - 1, currentPage + 2);
-
-    for (let page = start; page <= end; page++) {
-      container.appendChild(createPage(page));
-    }
-
-    if (end < totalPages) {
-      if (end < totalPages - 1) container.appendChild(createDots());
-      container.appendChild(createPage(totalPages));
-    }
-
-    container.appendChild(createBtn('›', currentPage + 1, currentPage === totalPages));
-    container.appendChild(createBtn('»', totalPages, currentPage === totalPages));
-  }
-
-  function createPage(page) {
-    const link = document.createElement('a');
-
-    link.href = getPageUrl(page);
-    link.textContent = page;
-    link.className = 'page';
-
-    if (page === currentPage) link.classList.add('active');
-
-    return link;
-  }
-
-  function createBtn(symbol, page, disabled) {
-    const link = document.createElement('a');
-
-    link.textContent = symbol;
-    link.className = 'btn';
-
-    if (disabled) {
-      link.href = '#';
-      link.classList.add('disabled');
-      link.setAttribute('aria-disabled', 'true');
-    } else {
-      link.href = getPageUrl(page);
-    }
-
-    return link;
-  }
-
-  function createDots() {
-    const div = document.createElement('div');
-    div.className = 'dots';
-
-    for (let i = 0; i < 3; i++) {
-      const span = document.createElement('span');
-      span.className = 'dot';
-      div.appendChild(span);
-    }
-
-    return div;
-  }
-
-  function getPageUrl(page) {
-    const params = new URLSearchParams(window.location.search);
-    params.set('page', page);
-
-    return `${window.location.pathname}?${params.toString()}`;
-  }
-}
-
 
 // orders
 
@@ -737,7 +686,9 @@ function initCartClearing() {
 
   const mainContent = qs('.page-content');
   const emptyBlock = qs('.empty-block');
-  const clearCartBtn = qs('[data-action="clear-cart"]');
+
+  // Используем более специфичный селектор для корзины
+  const clearCartBtn = qs('[data-action="clear-cart"][data-cart-type="cart"]');
 
   clearCartBtn?.addEventListener('click', clearCart);
 
@@ -1205,7 +1156,6 @@ onReady(() => {
   initSortSelect();
   initCustomSelectors();
   initSelectOutsideClick();
-  initPagination();
   initOrdersSelect();
   initOrdersList();
   initDetailsInfo();
@@ -1250,27 +1200,39 @@ function onePageCheckoutAdditionalFields() {
   var separator = '; ';
   var array = [];
 
-  var paymentValue = $('.payment-items input:checked').val();
+  var paymentValue = $('input[name="payment_method"]:checked').val();
   var paymentLabels = {
-    'pay_cash': 'Наличными курьеру',
-    'pay_card': 'Картой курьеру',
+    'pay_cash': 'Наличными',
+    'pay_card': 'Картой',
     'pay_online': 'Картой онлайн'
   };
   if (paymentValue && paymentLabels[paymentValue]) {
     array.push('Метод оплаты: ' + paymentLabels[paymentValue]);
   }
 
-  var deliveryValue = $('input[name="pd_d-type"]:checked').val();
-  var deliveryLabels = {
-    '1': 'В ближайшее время',
-    '2': 'В выбранное время',
-    '3': 'Экспресс доставка'
-  };
-  if (deliveryValue && deliveryLabels[deliveryValue]) {
-    array.push('Доставить заказ: ' + deliveryLabels[deliveryValue]);
+  var deliveryType = $('input[name="delivery"]:checked').val();
+
+  if (deliveryType === 'express') {
+    array.push('Доставить заказ: Экспресс');
+  }
+  else {
+    var deliveryText = 'В ближайшее время';
+
+    if (!$('#asap-btn').hasClass('active')) {
+      var selectedDate = $('#delivery-dateTime').val().trim();
+
+      if (selectedDate.length > 0) {
+        deliveryText = selectedDate;
+      }
+    }
+
+    array.push('Доставить заказ: ' + deliveryText);
   }
 
-  var missingValue = $('input[name="pd_missing"]:checked').val();
+  var missingValue = $('input[name="pd_missing"]').val();
+  if (!missingValue) {
+    missingValue = $('input[name="pd_missing"]:checked').val();
+  }
   var missingLabels = {
     'replace': 'Связаться и согласовать замену',
     'analog': 'Заменить товар на аналогичный',
@@ -1290,7 +1252,8 @@ function onePageCheckoutAdditionalFields() {
     array.push('Комментарий к заказу: ' + comment);
   }
 
-  address2.val(array.join(separator));
+  var result = array.join(separator);
+  address2.val(result);
 }
 
 function updateAddress() {
@@ -1301,6 +1264,24 @@ function updateAddress() {
     addressInput.value = addressValue;
   }
 }
+
+function toggleDeliveryType() {
+
+  if ($('#express').is(':checked')) {
+    $('#delivery-time-block').hide();
+  }
+  else {
+    $('#delivery-time-block').show();
+  }
+
+  onePageCheckoutAdditionalFields();
+}
+
+$(document).on('change', 'input[name="delivery"]', toggleDeliveryType);
+
+$(function () {
+  toggleDeliveryType();
+});
 
 function initOrdersFilters() {
 
@@ -1432,43 +1413,334 @@ function initOrdersFilters() {
 
 
   sortOptions?.forEach(option => {
-
-
     option.addEventListener('click', function () {
-
 
       currentSort = this.dataset.value;
 
-
-
       if (sortInput) {
-
         sortInput.value = currentSort;
-
       }
-
-
 
       if (sortTrigger) {
-
         sortTrigger.textContent = this.textContent;
-
       }
 
-
-
       renderOrders();
-
-
     });
-
-
   });
 
-
-
-
-
   renderOrders();
-
 }
+
+// wishlist share
+$(document).ready(function () {
+  $('.wishlist-share-copy-btn').on('click', function () {
+    var url = $(this).data('url');
+    copyToClipboard(url, this);
+  });
+});
+
+function copyToClipboard(text, button) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text)
+      .then(function () {
+        showCopied(button);
+      })
+      .catch(function () {
+        fallbackCopy(text, button);
+      });
+  } else {
+    fallbackCopy(text, button);
+  }
+}
+
+function fallbackCopy(text, button) {
+  var textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  textarea.style.left = '-9999px';
+  document.body.appendChild(textarea);
+  textarea.select();
+
+  try {
+    var success = document.execCommand('copy');
+    if (success) {
+      showCopied(button);
+    } else {
+      showToastOld('Не удалось скопировать');
+    }
+  } catch (err) {
+    showToastOld('Ошибка копирования');
+  }
+
+  document.body.removeChild(textarea);
+}
+
+function showCopied(button) {
+  var $btn = $(button);
+  var originalText = $btn.text();
+
+  $btn.text('Скопировано!');
+  $btn.addClass('copied');
+
+  setTimeout(function () {
+    $btn.text(originalText);
+    $btn.removeClass('copied');
+  }, 2000);
+
+  showToastOld('Ссылка скопирована');
+}
+
+function showToastOld(message) {
+  var oldToast = document.querySelector('.wishlist-toast');
+  if (oldToast) oldToast.remove();
+
+  var toast = document.createElement('div');
+  toast.className = 'wishlist-toast';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  setTimeout(function () {
+    toast.classList.add('show');
+  }, 10);
+
+  setTimeout(function () {
+    toast.classList.remove('show');
+    setTimeout(function () {
+      toast.remove();
+    }, 300);
+  }, 2500);
+}
+
+$(document).ready(function () {
+  $('.wishlist-clear-btn').on('click', function () {
+    var wishlistId = $(this).data('wishlist-id');
+    showClearPopup(wishlistId);
+  });
+});
+
+function showClearPopup(wishlistId) {
+  var overlay = document.createElement('div');
+  overlay.className = 'wishlist-popup-overlay active';
+  overlay.innerHTML = `
+        <div class="wishlist-popup">
+            <div class="wishlist-popup-title">Очистить избранное?</div>
+            <div class="wishlist-popup-text">Вы уверены, что хотите удалить все товары из списка избранных?</div>
+            <div class="wishlist-popup-actions">
+                <button class="wishlist-popup-btn wishlist-popup-btn-cancel">Отмена</button>
+                <button class="wishlist-popup-btn wishlist-popup-btn-confirm">Очистить</button>
+            </div>
+        </div>
+    `;
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) {
+      closePopup(overlay);
+    }
+  });
+
+  overlay.querySelector('.wishlist-popup-btn-cancel').addEventListener('click', function () {
+    closePopup(overlay);
+  });
+
+  overlay.querySelector('.wishlist-popup-btn-confirm').addEventListener('click', function () {
+    closePopup(overlay);
+    clearWishlist(wishlistId);
+  });
+}
+
+function closePopup(overlay) {
+  overlay.classList.remove('active');
+  setTimeout(function () {
+    overlay.remove();
+  }, 300);
+}
+
+function clearWishlist(wishlistId) {
+  if (wishlistId && wishlistId > 0 && typeof deleteCustomWishlist === 'function') {
+    deleteCustomWishlist();
+    return;
+  }
+
+  var checkboxes = document.querySelectorAll('input[name="removefromcart"]');
+  checkboxes.forEach(function (cb) {
+    cb.checked = true;
+  });
+
+  var updateBtn = document.getElementById('updatecart');
+  if (updateBtn) {
+    updateBtn.click();
+  }
+}
+
+$(document).ready(function () {
+  var $removeSelectedBtn = $('#remove-selected-btn');
+
+  $removeSelectedBtn.on('click', function () {
+    var selectedIds = getSelectedIds();
+    if (selectedIds.length === 0) {
+      if (typeof displayBarNotification === 'function') {
+        displayBarNotification('Выберите товары для удаления', 'warning', 3000);
+      }
+      return;
+    }
+
+    showRemoveSelectedPopup(selectedIds);
+  });
+
+  function getSelectedIds() {
+    var ids = [];
+    $('.product-item__add-to-cart-checkbox:checked').each(function () {
+      ids.push($(this).val());
+    });
+    return ids;
+  }
+
+  function showRemoveSelectedPopup(selectedIds) {
+    var count = selectedIds.length;
+    var overlay = document.createElement('div');
+    overlay.className = 'wishlist-popup-overlay active';
+    overlay.innerHTML = `
+            <div class="wishlist-popup">
+                <div class="wishlist-popup-title">Удалить выбранные товары?</div>
+                <div class="wishlist-popup-text">Вы уверены, что хотите удалить <strong>${count}</strong> ${getProductWord(count)} из списка избранных?</div>
+                <div class="wishlist-popup-actions">
+                    <button class="wishlist-popup-btn wishlist-popup-btn-cancel">Отмена</button>
+                    <button class="wishlist-popup-btn wishlist-popup-btn-confirm">Удалить</button>
+                </div>
+            </div>
+        `;
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) {
+        closePopup(overlay);
+      }
+    });
+
+    overlay.querySelector('.wishlist-popup-btn-cancel').addEventListener('click', function () {
+      closePopup(overlay);
+    });
+
+    overlay.querySelector('.wishlist-popup-btn-confirm').addEventListener('click', function () {
+      closePopup(overlay);
+      removeSelectedItems(selectedIds);
+    });
+  }
+
+  function getProductWord(count) {
+    var lastDigit = count % 10;
+    var lastTwoDigits = count % 100;
+
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
+      return 'товаров';
+    }
+    if (lastDigit === 1) {
+      return 'товар';
+    }
+    if (lastDigit >= 2 && lastDigit <= 4) {
+      return 'товара';
+    }
+    return 'товаров';
+  }
+
+  function removeSelectedItems(selectedIds) {
+    selectedIds.forEach(function (id) {
+      var $item = $('.product-item[data-id="' + id + '"]');
+      var $removeCheckbox = $item.find('input[name="removefromcart"]');
+      if ($removeCheckbox.length) {
+        $removeCheckbox.prop('checked', true);
+      }
+    });
+
+    var updateBtn = document.getElementById('updatecart');
+    if (updateBtn) {
+      updateBtn.click();
+    }
+  }
+
+  function closePopup(overlay) {
+    overlay.classList.remove('active');
+    setTimeout(function () {
+      overlay.remove();
+    }, 300);
+  }
+});
+
+function toggleWishlist(button, url) {
+  var $btn = $(button);
+  var isInWishlist = $btn.hasClass('active');
+
+  if (isInWishlist) {
+    window.location.href = '/wishlist';
+  } else {
+    $btn.addClass('adding');
+    AjaxCart.addproducttocart_catalog(url);
+    setTimeout(function () {
+      $btn.removeClass('adding');
+      $btn.addClass('active');
+    }, 500);
+  }
+}
+
+function initWishlistStates() {
+  $.ajax({
+    url: '/wishlist/getwishlistproductids',
+    type: 'GET',
+    dataType: 'json',
+    success: function (data) {
+      if (data && data.length > 0) {
+        $('.product__card-favorite-btn').each(function () {
+          var $btn = $(this);
+          var productId = parseInt($btn.data('productid'));
+          if (data.includes(productId)) {
+            $btn.addClass('active');
+          }
+        });
+      }
+    },
+    error: function () {
+      console.log('Не удалось загрузить состояние избранного');
+    }
+  });
+}
+
+$(document).ready(function () {
+  initWishlistStates();
+});
+
+$(document).ready(function () {
+  if (typeof displayBarNotification === 'function') {
+    var originalDisplay = displayBarNotification;
+
+    window.displayBarNotification = function (message, type, timeout) {
+      originalDisplay(message, type, timeout);
+
+      setTimeout(function () {
+        var $notification = $('.bar-notification:last');
+        if ($notification.length) {
+          $notification.addClass('show');
+
+          if (timeout && timeout > 0) {
+            setTimeout(function () {
+              $notification.addClass('removing');
+              setTimeout(function () {
+                $notification.remove();
+              }, 300);
+            }, timeout);
+          }
+        }
+      }, 50);
+    };
+  }
+
+  $(document).on('click', '.bar-notification .close', function () {
+    var $notification = $(this).closest('.bar-notification');
+    $notification.addClass('removing');
+    setTimeout(function () {
+      $notification.remove();
+    }, 300);
+  });
+});

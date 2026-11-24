@@ -3,7 +3,6 @@
 @using Nop.Core
 @using Nop.Core.Domain.Catalog
 @using Nop.Core.Domain.Orders
-@using Nop.Core.Domain.Tax
 @using Nop.Core.Http
 
 @inject CatalogSettings catalogSettings
@@ -33,16 +32,19 @@
     <div class="product__card-img-block">
 
         <button class="product__card-favorite-btn"
-        type="button"
-        title="@T("ShoppingCart.AddToWishlist")"
-        onclick="AjaxCart.addproducttocart_catalog('@addtowishlistlink');return false;">
-            <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/favorite-ico.svg")" alt="В избранное" class="favorite-btn__img">
+                type="button"
+                title="@T("ShoppingCart.AddToWishlist")"
+                data-productid="@Model.Id"
+                onclick="toggleWishlist(this, '@addtowishlistlink');return false;">
+            <svg class="favorite-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
         </button>
 
         @{
             var picture = Model.PictureModels.FirstOrDefault();
         }
-        
+
         <a href="@(await NopUrl.RouteGenericUrlAsync<Product>(new { SeName = Model.SeName }))" title="@picture?.Title">
             <img src="@picture?.ImageUrl" alt="@picture?.AlternateText" title="@picture?.Title" class="product__card-img" />
         </a>
@@ -56,7 +58,7 @@
         </div>
 
         <a class="product__card-title"
-               href="@(await NopUrl.RouteGenericUrlAsync<Product>(new { SeName = Model.SeName }))">
+           href="@(await NopUrl.RouteGenericUrlAsync<Product>(new { SeName = Model.SeName }))">
             @Model.Name
         </a>
     </div>
@@ -65,6 +67,7 @@
         @{
             var isWeightProduct = Model.MeasureTypeId == 1;
         }
+
         <div class="product-card__counter product-counter"
              data-unit="@(isWeightProduct ? "kg" : "piece")"
              data-step="@(isWeightProduct ? "0.1" : "1")"
@@ -74,15 +77,17 @@
             <button type="button" class="counter-btn counter-block btn-minus"></button>
 
             <div class="counter-block counter__value-block">
-                <input type="text"
-                       class="counter-value"
-                       value="@(isWeightProduct ? "1.0" : "1")"
-                       inputmode="decimal"
-                       @(isWeightProduct ? "readonly" : "")>
+                <div class="counter-value-group">
+                    <input type="text"
+                           class="counter-value"
+                           value="@(isWeightProduct ? "1.0" : "1")"
+                           inputmode="decimal"
+                    @(isWeightProduct ? "readonly" : "")>
 
-                <span class="counter-unit">
-                    @(isWeightProduct ? "кг" : "шт")
-                </span>
+                    <span class="counter-unit">
+                        @(isWeightProduct ? "кг" : "шт")
+                    </span>
+                </div>
             </div>
 
             <button type="button" class="counter-btn counter-block btn-plus"></button>
@@ -113,4 +118,5 @@
             }
         }
     </div>
+
 </article>

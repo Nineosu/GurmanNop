@@ -29,7 +29,12 @@
 
     //Flatpickr JS
     NopHtml.AppendScriptParts(ResourceLocation.Footer,
+    $"~/Themes/{themeName}/Content/lib/flatpickr/flatpickr.ru.js");
+    NopHtml.AppendScriptParts(ResourceLocation.Footer,
         $"~/Themes/{themeName}/Content/lib/flatpickr/flatpickr.min.js");
+
+    NopHtml.AppendScriptParts(ResourceLocation.Footer,
+    "~/lib_npm/jquery/jquery.min.js");
 
     //Main JS
     // NopHtml.AppendScriptParts(ResourceLocation.Footer,

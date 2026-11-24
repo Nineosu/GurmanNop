@@ -56,7 +56,7 @@
         <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account-bg-2.svg")" alt="" class="background-img">
         <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/account-bg-1.svg")" alt="" class="background-img">
     </div>
-
+    
     <div class="wrapper">
         <div class="account-menu">
             <div class="account-menu__top">
@@ -174,8 +174,19 @@
 
                                                 @if (!string.IsNullOrEmpty(item.AttributeInfo))
                                                 {
+                                                    var attributeInfo = item.AttributeInfo;
+
+                                                    if (attributeInfo.StartsWith("Вес:"))
+                                                    {
+                                                        attributeInfo = System.Text.RegularExpressions.Regex.Replace(
+                                                            attributeInfo,
+                                                            @"\s*\[.*?\]",
+                                                            ""
+                                                        );
+                                                    }
+
                                                     <span class="product-item__subtitle">
-                                                        @Html.Raw(item.AttributeInfo)
+                                                        @Html.Raw(attributeInfo)
                                                     </span>
                                                 }
 
@@ -239,7 +250,6 @@
                                 <p class="order-details__info-title">
                                     Доставка
                                 </p>
-
                                 @if (Model.IsShippable && Model.ShippingAddress != null)
                                 {
                                     <div class="order-details__info-block">

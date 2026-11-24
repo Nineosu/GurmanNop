@@ -8,11 +8,18 @@
 }
 
 <div class="checkout-data">
-
     @await Component.InvokeAsync(typeof(WidgetViewComponent),
         new { widgetZone = PublicWidgetZones.OpCheckoutBillingAddressTop, additionalData = Model })
 
-    @if (Model.ShipToSameAddressAllowed)
+    <div class="form-block delivery-type__btns">
+        <input type="radio" name="delivery" id="standard" class="form__radio-input" value="standard" checked>
+        <label for="standard" class="form__radio-btn interactive">Обычная доставка</label>
+
+        <input type="radio" name="delivery" id="express" class="form__radio-input" value="express">
+        <label for="express" class="form__radio-btn interactive">Экспресс доставка</label>
+    </div>
+
+    @if (Model.ShipToSameAddressAllowed && false)
     {
         <div class="section ship-to-same-address">
             <p class="selector">
@@ -90,17 +97,17 @@
         </div>
     </fieldset>
 
-    <fieldset>
+    <fieldset id="delivery-time-block">
         <legend class="fieldset-title">Когда доставить заказ?</legend>
 
-        <div class="form-block">
+        <div class="form-block delivery__form-block">
             <button type="button" id="asap-btn" class="form__radio-btn interactive active">
                 В ближайшее время
             </button>
 
-            <div class="input-field dateTime-input">
-                <img src="./img/form-calendar_gray.svg" alt="" class="input-field__ico gray-ico">
-                <img src="./img/form-calendar_white.svg" alt="" class="input-field__ico white-ico hide">
+            <div class="input-field dateTime-input interactive">
+                <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/form-calendar_gray.svg")" alt="" class="input-field__ico gray-ico">
+                <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/form-calendar_white.svg")" alt="" class="input-field__ico white-ico hide">
 
                 <input type="text" id="delivery-dateTime" name="deliveryDateTime" placeholder="Выбрать дату и время">
 

@@ -18,13 +18,15 @@
     NopHtml.AddMetaKeywordParts(Model.MetaKeywords);
     NopHtml.AppendPageCssClassParts("html-category-page");
 
+    var categoryUrl = await NopUrl.RouteGenericUrlAsync<Category>(
+        new { SeName = Model.SeName },
+        webHelper.GetCurrentRequestProtocol());
+
     if (seoSettings.CanonicalUrlsEnabled)
     {
-        var categoryUrl = (await NopUrl.RouteGenericUrlAsync<Category>(
-            new { SeName = Model.SeName },
-            webHelper.GetCurrentRequestProtocol())).ToLowerInvariant();
-
-        NopHtml.AddCanonicalUrlParts(categoryUrl, seoSettings.QueryStringInCanonicalUrlsEnabled);
+        NopHtml.AddCanonicalUrlParts(
+            categoryUrl.ToLowerInvariant(),
+            seoSettings.QueryStringInCanonicalUrlsEnabled);
     }
 
     var breadcrumbDelimiter = commonSettings.BreadcrumbDelimiter;
@@ -51,7 +53,9 @@
             @if (Model.DisplayCategoryBreadcrumb)
             {
                 <nav class="breadcrumbs">
-                    <a href="@Url.RouteUrl(NopRouteNames.General.HOMEPAGE)">Главная</a>
+                    <a href="@Url.RouteUrl(NopRouteNames.General.HOMEPAGE)">
+                        Главная
+                    </a>
 
                     @foreach (var cat in Model.CategoryBreadcrumb)
                     {
@@ -65,7 +69,8 @@
                         }
                         else
                         {
-                            <a href="@(await NopUrl.RouteGenericUrlAsync<Category>(new { SeName = cat.SeName }))">
+                            <a href="@(await NopUrl.RouteGenericUrlAsync<Category>(
+                                                               new { SeName = cat.SeName }))">
                                 @cat.Name
                             </a>
                         }
@@ -79,43 +84,59 @@
                     @Model.Name
                 </p>
 
-                @* @if (Model.SubCategories.Any())
+                @if (Model.SubCategories.Any())
                 {
-                    <div class="category-buttons">
+                    <div class="category-navigation">
+                        <a href="@Url.RouteUrl("Category", new { SeName = Model.SeName })"
+                           class="category-navigation__item category-navigation__item--active">
+                            Все
+                        </a>
+
                         @foreach (var subCategory in Model.SubCategories)
                         {
                             <a href="@Url.RouteUrl("Category", new { SeName = subCategory.SeName })"
-                               class="category-button">
+                               class="category-navigation__item">
                                 @subCategory.Name
                             </a>
                         }
                     </div>
-                } *@
+                }
 
                 <div class="catalog-section__block">
 
-                        @await Html.PartialAsync("_CatalogSelectors", Model.CatalogProductsModel)
+                    @await Html.PartialAsync("_CatalogSelectors", Model.CatalogProductsModel)
 
-                    <div class="catalog__products" data-fetch-url="@ViewData["fetchUrl"]">
+                    <div class="catalog__products">
 
-                        @await Component.InvokeAsync(typeof(WidgetViewComponent),
-                            new { widgetZone = PublicWidgetZones.CategoryDetailsTop, additionalData = Model })
+                        @await Component.InvokeAsync(
+                            typeof(WidgetViewComponent),
+                            new
+                            {
+                                widgetZone = PublicWidgetZones.CategoryDetailsTop,
+                                additionalData = Model
+                            })
 
                         @{
-                            var viewData = new ViewDataDictionary(ViewData);
-                            viewData["fetchUrl"] = Html.Raw(
-                                Url.RouteUrl(NopRouteNames.Ajax.GET_CATEGORY_PRODUCTS,
-                                new { categoryId = Model.Id }));
+                            var catalogProductsViewData = new ViewDataDictionary(ViewData);
+
+                            catalogProductsViewData["fetchUrl"] = Html.Raw(
+                                Url.RouteUrl(
+                                    NopRouteNames.Ajax.GET_CATEGORY_PRODUCTS,
+                                    new { categoryId = Model.Id }));
                         }
 
-
-                        @await Html.PartialAsync("_CatalogProducts",
+                        @await Html.PartialAsync(
+                            "_CatalogProducts",
                             Model.CatalogProductsModel,
-                            viewData)
+                            catalogProductsViewData)
 
-
-                        @await Component.InvokeAsync(typeof(WidgetViewComponent),
-                            new { widgetZone = PublicWidgetZones.CategoryDetailsBottom, additionalData = Model })
+                        @await Component.InvokeAsync(
+                            typeof(WidgetViewComponent),
+                            new
+                            {
+                                widgetZone = PublicWidgetZones.CategoryDetailsBottom,
+                                additionalData = Model
+                            })
 
                     </div>
 

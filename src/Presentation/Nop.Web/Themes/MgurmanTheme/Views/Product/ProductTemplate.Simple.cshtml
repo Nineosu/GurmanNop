@@ -121,7 +121,7 @@
                                  data-unit="@(isWeightProduct ? "kg" : "шт")"
                                  data-step="@(isWeightProduct ? "0.1" : "1")"
                                  data-min="@(isWeightProduct ? "0.1" : "1")"
-                                 data-max="@(isWeightProduct ? "2" : "99")"
+                                 data-max="@(isWeightProduct ? "10" : "99")"
                                  data-product-id="@Model.Id"
                                  data-is-weight="@isWeightProduct.ToString().ToLower()">
 
@@ -139,6 +139,7 @@
 
                             </div>
 
+                            
                             <div class="product-card__btns">
 
                                 @{
@@ -155,23 +156,23 @@
 
                             </div>
 
-                            @if (!string.IsNullOrEmpty(Model.ShortDescription))
+                            @* @if (!string.IsNullOrEmpty(Model.ShortDescription))
                             {
                                 <div class="product-description">
                                     @Html.Raw(Model.ShortDescription)
                                 </div>
-                            }
+                            } *@
 
                         </div>
 
                     </div>
 
-                    @if (!string.IsNullOrEmpty(Model.FullDescription))
+                    @* @if (!string.IsNullOrEmpty(Model.FullDescription))
                     {
                         <div class="full-description">
                             @Html.Raw(Model.FullDescription)
                         </div>
-                    }
+                    } *@
 
                 </form>
 

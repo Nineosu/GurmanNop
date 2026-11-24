@@ -21,12 +21,12 @@
     </div>
 
     var pager = Html.Pager(Model)
-        .QueryParam("pagenumber")
-        // for search page
-        .BooleanParameterName("advs")
-        .BooleanParameterName("isc")
-        .BooleanParameterName("sid")
-        .RenderEmptyParameters(true);
+       .QueryParam("pagenumber")
+       .BooleanParameterName("advs")
+       .BooleanParameterName("isc")
+       .BooleanParameterName("sid")
+       .IndividualPagesDisplayedCount(5)
+       .RenderEmptyParameters(true);
 
     @if (!await pager.IsEmpty())
     {

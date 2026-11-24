@@ -4,9 +4,11 @@ using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.FilterLevels;
 using Nop.Core.Domain.Media;
+using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Vendors;
 using Nop.Core.Http;
 using Nop.Core.Rss;
+using Nop.Data;
 using Nop.Services.Catalog;
 using Nop.Services.Common;
 using Nop.Services.FilterLevels;
@@ -53,6 +55,8 @@ public partial class CatalogController : BasePublicController
     protected readonly MediaSettings _mediaSettings;
     protected readonly VendorSettings _vendorSettings;
 
+    private readonly IRepository<OrderItem> _orderItemRepository;
+
     #endregion
 
     #region Ctor
@@ -79,7 +83,8 @@ public partial class CatalogController : BasePublicController
         IWorkContext workContext,
         FilterLevelSettings filterLevelSettings,
         MediaSettings mediaSettings,
-        VendorSettings vendorSettings)
+        VendorSettings vendorSettings,
+        IRepository<OrderItem> orderItemRepository)
     {
         _catalogSettings = catalogSettings;
         _aclService = aclService;
@@ -104,6 +109,7 @@ public partial class CatalogController : BasePublicController
         _filterLevelSettings = filterLevelSettings;
         _mediaSettings = mediaSettings;
         _vendorSettings = vendorSettings;
+        _orderItemRepository = orderItemRepository;
     }
 
     #endregion
@@ -423,13 +429,70 @@ public partial class CatalogController : BasePublicController
     }
 
     [HttpGet]
-    public virtual async Task<IActionResult> Catalog(CatalogProductsCommand command)
+    public virtual IActionResult Catalog()
     {
-        var searchModel = new SearchModel();
+        var url = Url.Action("Search", "Catalog") + "?q=";
+        return Redirect(url);
+    }
 
-        var model = await _catalogModelFactory.PrepareSearchModelAsync(searchModel, command);
+    [HttpGet]
+    public virtual async Task<IActionResult> Popular(CatalogProductsCommand command)
+    {
+        var pageNumber = command.PageNumber > 0
+            ? command.PageNumber
+            : 1;
 
-        return View("Search", model);
+        var pageSize = command.PageSize > 0
+            ? command.PageSize
+            : 20;
+
+        var popularProductIds = _orderItemRepository.Table
+            .GroupBy(x => x.ProductId)
+            .Select(g => new
+            {
+                ProductId = g.Key,
+                TotalSold = g.Sum(x => x.Quantity)
+            })
+            .OrderByDescending(x => x.TotalSold)
+            .Select(x => x.ProductId)
+            .ToList();
+
+        var totalCount = popularProductIds.Count;
+
+        var pageProductIds = popularProductIds
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToArray();
+
+        var products = await _productService.GetProductsByIdsAsync(pageProductIds);
+
+        products = pageProductIds
+            .Join(
+                products,
+                id => id,
+                p => p.Id,
+                (_, p) => p)
+            .ToList();
+
+        var pagedProducts = new PagedList<Product>(
+            products,
+            pageNumber - 1,
+            pageSize,
+            totalCount);
+
+        var productModels =
+            await _productModelFactory.PrepareProductOverviewModelsAsync(
+                pagedProducts);
+
+        var model = new CatalogProductsModel
+        {
+            Products = productModels.ToList(),
+            UseAjaxLoading = false
+        };
+
+        model.LoadPagedList(pagedProducts);
+
+        return View(model);
     }
 
     #endregion

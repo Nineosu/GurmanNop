@@ -1,0 +1,251 @@
+﻿@model Nop.Web.Areas.Admin.Models.Orders.PrintOrderModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <title>Заказ @Model.OrderNumber</title>
+
+    <style>
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: Arial, sans-serif;
+                color: #222;
+                margin: 0;
+                padding: 15px;
+                font-size: 13px;
+            }
+
+            .order {
+                max-width: 800px;
+                margin: auto;
+            }
+
+            .header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 15px;
+            }
+
+            .order-number {
+                font-size: 26px;
+                font-weight: bold;
+            }
+
+            .section-title {
+                font-size: 15px;
+                font-weight: bold;
+                margin: 12px 0 8px;
+            }
+
+            .info-block {
+                border-bottom: 1px solid #ddd;
+                padding-bottom: 10px;
+            }
+
+            .info-row {
+                display: flex;
+                gap: 6px;
+                margin-bottom: 5px;
+            }
+
+                .info-row b {
+                    min-width: max-content;
+                }
+
+            .product {
+                display: flex;
+                gap: 15px;
+                padding: 10px 0;
+                border-bottom: 1px solid #ddd;
+                page-break-inside: avoid;
+            }
+
+                .product:last-child {
+                    border-bottom: none;
+                }
+
+            .product-image {
+                width: 90px;
+                height: 90px;
+                flex-shrink: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+                .product-image img {
+                    max-width: 90px;
+                    max-height: 90px;
+                    object-fit: contain;
+                }
+
+            .product-info {
+                flex: 1;
+            }
+
+            .product-name {
+                font-weight: bold;
+                font-size: 15px;
+                margin-bottom: 7px;
+            }
+
+            .product-row {
+                margin-bottom: 4px;
+            }
+
+            .total {
+                margin-top: 15px;
+                padding-top: 10px;
+                border-top: 2px solid #222;
+                text-align: right;
+                font-size: 18px;
+                font-weight: bold;
+            }
+    </style>
+</head>
+
+<body>
+
+    <div class="order">
+
+        <div class="header">
+            <div>
+                <div class="info-row">
+                    <b>Дата создания:</b>
+                    @Model.CreatedOn
+                </div>
+            </div>
+
+            <div class="order-number">
+                № @Model.OrderNumber
+            </div>
+        </div>
+
+
+        <div class="section-title">
+            Платёжная информация:
+        </div>
+
+        <div class="info-block">
+
+            <div class="info-row">
+                <b>Имя:</b>
+                @Model.FullName
+            </div>
+
+            <div class="info-row">
+                <b>Телефон:</b>
+                @Model.Phone
+            </div>
+
+            <div class="info-row">
+                <b>Адрес:</b>
+                @Model.Address
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Address2))
+            {
+                foreach (var line in Model.Address2.Split(';'))
+                {
+                    if (!string.IsNullOrWhiteSpace(line))
+                    {
+                        <div class="info-row">
+                            <b>
+                                @line.Split(':')[0]:
+                            </b>
+
+                            @line.Substring(
+                                line.IndexOf(':') + 1
+                            )
+                        </div>
+                    }
+                }
+            }
+
+        </div>
+
+
+        <div class="section-title">
+            Товары:
+        </div>
+
+        <div class="products-list">
+            @foreach (var item in Model.Items)
+            {
+                <div class="product">
+
+                    @if (!string.IsNullOrEmpty(item.PictureUrl))
+                    {
+                        <div class="product-image">
+                            <img src="@item.PictureUrl" />
+                        </div>
+                    }
+
+                    <div class="product-info">
+
+                        <div class="product-name">
+                            @item.Name
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(item.Sku))
+                        {
+                            <div class="product-row">
+                                <b>Артикул:</b>
+                                @item.Sku
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(item.Weight))
+                        {
+                            <div class="product-row">
+                                <b>Вес:</b><br />
+                                @item.Weight
+                            </div>
+                        }
+
+                        <div class="product-row">
+                            <b>Цена за ед.:</b>
+                            @item.Price.ToString("0.00")
+                        </div>
+
+                        <div class="product-row">
+                            <b>Количество:</b>
+                            @item.Quantity
+                        </div>
+
+                        <div class="product-row">
+                            <b>Сумма:</b>
+                            @item.Total.ToString("0.00")
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+        </div>
+
+        <div class="total">
+            Сумма заказа:
+            @Model.Total.ToString("0.00")
+        </div>
+
+    </div>
+
+
+    <script>
+            window.onload = function () {
+              window.print();
+            }
+    </script>
+
+</body>
+</html>

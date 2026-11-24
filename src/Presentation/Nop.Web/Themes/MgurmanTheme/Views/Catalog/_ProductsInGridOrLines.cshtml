@@ -12,4 +12,28 @@
         }
 
     </div>
+
+    var pager = Html.Pager(Model)
+       .QueryParam("pagenumber")
+       .BooleanParameterName("advs")
+       .BooleanParameterName("isc")
+       .BooleanParameterName("sid")
+       .RenderEmptyParameters(true)
+       .ShowFirst(true)
+       .ShowLast(true)
+       .ShowPrevious(true)
+       .ShowNext(true);
+
+    @if (!await pager.IsEmpty())
+    {
+        <div class="products__pagination">
+            @pager
+        </div>
+    }
+}
+else if (!string.IsNullOrEmpty(Model.NoResultMessage))
+{
+    <div class="no-result">
+        @Model.NoResultMessage
+    </div>
 }
