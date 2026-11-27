@@ -46,6 +46,11 @@ public static partial class NopRouteNames
         public const string CONTACT_US = "ContactUs";
 
         /// <summary>
+        /// Gets the about us route name
+        /// </summary>
+        public const string ABOUT_US = "AboutUs";
+
+        /// <summary>
         /// Gets the product search route name
         /// </summary>
         public const string SEARCH = "ProductSearch";        
@@ -652,6 +657,16 @@ public static partial class NopRouteNames
         /// Gets the add product to cart route name (with attributes and options). Used on product details pages
         /// </summary>
         public const string ADD_PRODUCT_TO_CART_DETAILS = "AddProductToCart-Details";
+
+        /// <summary>
+        /// Gets the add product to wishlist route name (without attributes and quantity). Used on catalog and product details pages
+        /// </summary>
+        public const string ADD_PRODUCT_TO_WISHLIST_CATALOG = "AddProductToWishlist-Catalog";
+
+        /// <summary>
+        /// Gets the wishlist product identifiers route name
+        /// </summary>
+        public const string GET_WISHLIST_PRODUCT_IDS = "GetWishlistProductIds";
 
         /// <summary>
         /// Gets the comparing products route name

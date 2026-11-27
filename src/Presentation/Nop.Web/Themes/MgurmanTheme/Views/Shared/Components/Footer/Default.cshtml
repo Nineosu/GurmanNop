@@ -1,4 +1,5 @@
-﻿@using static Nop.Services.Common.NopLinksDefaults
+﻿@using Nop.Core.Http
+@using static Nop.Services.Common.NopLinksDefaults
 
 <section class="footer-banner">
     <div class="wrapper">
@@ -27,7 +28,7 @@
                             <a href="#!">Как мы работаем</a>
                         </li>
                         <li class="footer__list-item">
-                            <a href="#!">О компании</a>
+                            <a href="@Url.RouteUrl(NopRouteNames.General.ABOUT_US)">О компании</a>
                         </li>
                     </ul>
                 </div>

@@ -112,6 +112,11 @@ public partial class RouteProvider : BaseRouteProvider, IRouteProvider
             pattern: $"{lang}/contactus",
             defaults: new { controller = "Common", action = "ContactUs" });
 
+        //about us
+        endpointRouteBuilder.MapControllerRoute(name: NopRouteNames.General.ABOUT_US,
+            pattern: $"{lang}/about-us",
+            defaults: new { controller = "Common", action = "AboutUs" });
+
         //product search
         endpointRouteBuilder.MapControllerRoute(name: NopRouteNames.General.SEARCH,
             pattern: $"{lang}/search/",

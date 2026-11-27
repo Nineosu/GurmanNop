@@ -5,10 +5,15 @@
 @inject IShoppingCartService shoppingCartService
 @inject IWorkContext workContext
 @inject IStoreContext storeContext
+@inject Nop.Services.Catalog.ICategoryService categoryService
+@inject Nop.Services.Seo.IUrlRecordService urlRecordService
 
 @{
     var cart = await shoppingCartService.GetShoppingCartAsync(await workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, storeContext.GetCurrentStore().Id);
     var cartCount = cart.Sum(item => item.Quantity);
+
+    var category = await categoryService.GetCategoryByIdAsync(45);
+    var categorySeName = await urlRecordService.GetSeNameAsync(category);
 }
 
 
@@ -30,7 +35,7 @@
                     </li>
 
                     <li class="header__list-item interactive">
-                        <a href="@Url.RouteUrl("NewProducts")">
+                        <a href="@Url.RouteUrl("Category", new { SeName = categorySeName })">
                             Акции
                         </a>
                     </li>
@@ -54,7 +59,7 @@
                     </li>
 
                     <li class="header__list-item interactive">
-                        <a href="@Url.RouteUrl("Topic", new { SeName = "about-us" })">
+                        <a href="@Url.RouteUrl(NopRouteNames.General.ABOUT_US)">
                             О компании
                         </a>
                     </li>

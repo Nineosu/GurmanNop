@@ -308,8 +308,7 @@ function initCartCounters(root = document) {
     const btnPlus = counter.querySelector(".btn-plus");
     const input = counter.querySelector(".counter-value");
 
-    if (!btnMinus || !btnPlus || !input)
-      return;
+    if (!input) return;
 
     function parseNumber(value) {
       if (typeof value === 'string') {
@@ -388,12 +387,12 @@ function initCartCounters(root = document) {
       }
     }
 
-    btnPlus.addEventListener("click", () => {
+    btnPlus?.addEventListener("click", () => {
       value += step;
       render(true);
     });
 
-    btnMinus.addEventListener("click", () => {
+    btnMinus?.addEventListener("click", () => {
       value -= step;
       render(true);
     });
@@ -805,6 +804,34 @@ function initAccountForms() {
   });
 }
 
+// about us page
+
+function initAboutDocuments() {
+  const documents = qs('[data-about-documents]');
+
+  if (!documents) return;
+
+  const toggle = qs('.about-page__documents-toggle', documents);
+  const toggleText = qs('.about-page__documents-toggle-text', documents);
+  const text = qs('.about-page__documents-text', documents);
+
+  if (!toggle) return;
+
+  toggle.addEventListener('click', () => {
+    const isExpanded = documents.classList.toggle('is-expanded');
+
+    toggle.setAttribute('aria-expanded', String(isExpanded));
+
+    if (text) {
+      text.style.height = isExpanded ? `${Math.min(text.scrollHeight, 760)}px` : '';
+    }
+
+    if (toggleText) {
+      toggleText.textContent = isExpanded ? 'Свернуть' : 'Развернуть';
+    }
+  });
+}
+
 // burger menu
 
 function initBurgerMenu() {
@@ -1165,6 +1192,7 @@ onReady(() => {
   initPasswordVisibility();
   initCodeInput();
   initAccountForms();
+  initAboutDocuments();
   initBurgerMenu();
   initOrdersFilters();
 });
@@ -1671,18 +1699,52 @@ $(document).ready(function () {
 
 function toggleWishlist(button, url) {
   var $btn = $(button);
-  var isInWishlist = $btn.hasClass('active');
 
-  if (isInWishlist) {
+  if ($btn.hasClass('active')) {
     window.location.href = '/wishlist';
-  } else {
-    $btn.addClass('adding');
-    AjaxCart.addproducttocart_catalog(url);
-    setTimeout(function () {
-      $btn.removeClass('adding');
-      $btn.addClass('active');
-    }, 500);
+    return;
   }
+
+  $btn.addClass('adding');
+
+  var postData = {};
+  addAntiForgeryToken(postData);
+
+  $.ajax({
+    url: url,
+    type: 'POST',
+    data: postData,
+    dataType: 'json',
+    success: function (response) {
+      if (response && response.success) {
+        $btn.addClass('active');
+
+        if (response.updatetopwishlistsectionhtml && AjaxCart.topwishlistselector) {
+          $(AjaxCart.topwishlistselector).html(response.updatetopwishlistsectionhtml);
+        }
+
+        if (response.message && typeof displayBarNotification === 'function') {
+          displayBarNotification(response.message, 'success', 3500);
+        }
+      } else {
+        var message = response && response.message ? response.message : 'Не удалось добавить товар в избранное';
+        if (Array.isArray(message)) {
+          message = message.join(' ');
+        }
+        if (typeof displayBarNotification === 'function') {
+          displayBarNotification(message, 'error', 0);
+        }
+      }
+    },
+    error: function () {
+      if (typeof displayBarNotification === 'function') {
+        displayBarNotification('Не удалось добавить товар в избранное', 'error', 0);
+      }
+    },
+    complete: function () {
+      $btn.removeClass('adding');
+    }
+  });
 }
 
 function initWishlistStates() {
@@ -1692,7 +1754,7 @@ function initWishlistStates() {
     dataType: 'json',
     success: function (data) {
       if (data && data.length > 0) {
-        $('.product__card-favorite-btn').each(function () {
+        $('.product__card-favorite-btn, .product-card__favorite-btn').each(function () {
           var $btn = $(this);
           var productId = parseInt($btn.data('productid'));
           if (data.includes(productId)) {

@@ -105,6 +105,11 @@ public partial class CommonController : BasePublicController
         return View();
     }
 
+    public virtual IActionResult AboutUs()
+    {
+        return View();
+    }
+
     //available even when a store is closed
     [CheckAccessClosedStore(ignore: true)]
     //available even when navigation is not allowed

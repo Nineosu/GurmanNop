@@ -1,0 +1,220 @@
+@using Nop.Core.Domain.Topics
+@using Nop.Services.Seo
+@using Nop.Services.Topics
+
+@inject ITopicService topicService
+@inject IUrlRecordService urlRecordService
+
+@{
+    Layout = "_ColumnsOne";
+
+    //title
+    NopHtml.AddTitleParts("О компании");
+    //page class
+    NopHtml.AppendPageCssClassParts("html-about-page");
+
+    var documentsTopic = await topicService.GetTopicBySystemNameAsync("Документы")
+        ?? await topicService.GetTopicBySystemNameAsync("AboutUs");
+
+    if (documentsTopic == null)
+    {
+        var documentsUrlRecord = await urlRecordService.GetBySlugAsync("documents")
+            ?? await urlRecordService.GetBySlugAsync("about-us");
+
+        if (documentsUrlRecord != null && documentsUrlRecord.EntityName == nameof(Topic))
+            documentsTopic = await topicService.GetTopicByIdAsync(documentsUrlRecord.EntityId);
+    }
+
+    if (documentsTopic != null && (!documentsTopic.Published || !topicService.TopicIsAvailable(documentsTopic)))
+        documentsTopic = null;
+}
+
+<div class="page-layout about-page">
+    <div class="wrapper">
+        <main class="about-page__main">
+            <h1 class="page-title about-page__title">О компании</h1>
+
+            <section class="about-page__section about-page__section--intro">
+                <h2 class="about-page__heading main-heading">Доставка продуктов в Крыму М-Гурман</h2>
+
+                <p class="about-page__lead">
+                    Если вы ищете надежный магазин с доставкой продуктов на дом в Симферополе или Севастополе,
+                    интернет-магазин Гурманчик предлагает уникальный сервис, который уже оценили тысячи жителей этих
+                    городов.
+                </p>
+
+                <div class="about-page__note">
+                    <p>
+                        Теперь мы рады сообщить, что расширяем свое направление и запускаем доставку продуктов в Ялте!
+                        Это значит, что качественная еда и выгодные цены стали доступны и для жителей этого прекрасного
+                        города!
+                    </p>
+                </div>
+            </section>
+
+            <section class="about-page__section">
+                <h2 class="about-page__heading">Почему стоит заказать продукты с доставкой от Гурманчик?</h2>
+
+                <p class="about-page__lead">
+                    В нашем каталоге вас ждёт настоящий гастрономический рай — от сочных, спелых овощей и ароматных
+                    фруктов до изысканных мясных деликатесов, разнообразной бакалеи и освежающих напитков. Мы тщательно
+                    отбираем каждый продукт, чтобы вы наслаждались свежестью и безупречным качеством, покупая еду на дом
+                    с абсолютным доверием и удовольствием.
+                </p>
+
+                <div class="about-page__cards">
+                    <article class="about-page__card">
+                        <h3 class="about-page__card-title">
+                            Что делает Гурманчик лучшим выбором для доставки еды на дом?
+                        </h3>
+
+                        <ul class="about-page__card-list">
+                            <li>
+                                Сэкономьте время и силы — забудьте о долгих походах в магазин и тяжёлых сумках, мы
+                                доставим всё прямо к вашему порогу;
+                            </li>
+                            <li>
+                                Выгодные цены и горячие акции — регулярно обновляем предложения, чтобы вы могли покупать
+                                любимые продукты по самым приятным ценам;
+                            </li>
+                            <li>
+                                Удобный сервис и заботливая поддержка — наша команда всегда на связи, готова помочь и
+                                сделать ваш опыт максимально комфортным;
+                            </li>
+                            <li>
+                                Новая доставка в Ялту — теперь жители Ялты получают полный спектр наших преимуществ и
+                                качественных товаров;
+                            </li>
+                            <li>
+                                Любимый выбор Симферополя и Севастополя — тысячи довольных клиентов рекомендуют нас своим
+                                друзьям и близким, подтверждая нашу репутацию.
+                            </li>
+                        </ul>
+                    </article>
+
+                    <article class="about-page__card">
+                        <h3 class="about-page__card-title">
+                            Основные преимущества нашего сервиса:
+                        </h3>
+
+                        <ul class="about-page__card-list">
+                            <li>
+                                Широкий ассортимент — вы можете купить всё необходимое в одном месте, не тратя время на
+                                поиски;
+                            </li>
+                            <li>
+                                Актуальные цены — доступные и прозрачные, без скрытых наценок;
+                            </li>
+                            <li>
+                                Удобство заказа — интуитивно понятный каталог и простая форма оформления заказа в пару
+                                кликов;
+                            </li>
+                            <li>
+                                Гарантия качества — только свежие и сертифицированные товары;
+                            </li>
+                            <li>
+                                Быстрая доставка продуктов — в удобное для вас время по Симферополю, Севастополю и Ялте;
+                            </li>
+                            <li>
+                                Выгодные предложения — мы ценим каждого клиента и предлагаем выгодные условия
+                            </li>
+                        </ul>
+                    </article>
+                </div>
+            </section>
+
+            <section class="about-page__section">
+                <h2 class="about-page__heading">Как оформить заказ продуктов с доставкой на дом?</h2>
+
+                <p class="about-page__lead">
+                    Оформить заказ вкуснейших продуктов с доставкой на дом в Симферополе, Севастополе или Ялте проще
+                    простого — всего несколько лёгких шагов отделяют вас от гастрономического удовольствия и комфорта
+                    прямо у вашей двери!
+                </p>
+
+                <ol class="about-page__steps">
+                    <li class="about-page__step">
+                        <span class="about-page__step-number">1</span>
+                        <p class="about-page__step-text">
+                            Выберите продукты в каталоге на сайте Гурманчик — все товары разбиты по категориям для
+                            удобства поиска.
+                        </p>
+                    </li>
+                    <li class="about-page__step">
+                        <span class="about-page__step-number">2</span>
+                        <p class="about-page__step-text">
+                            Добавьте товары в корзину — укажите необходимое количество и переходите к оформлению.
+                        </p>
+                    </li>
+                    <li class="about-page__step">
+                        <span class="about-page__step-number">3</span>
+                        <p class="about-page__step-text">
+                            Заполните форму заказа — укажите адрес доставки, контактные данные и желаемое время
+                            получения.
+                        </p>
+                    </li>
+                    <li class="about-page__step">
+                        <span class="about-page__step-number">4</span>
+                        <p class="about-page__step-text">
+                            Выберите способ оплаты — доступна оплата онлайн или при получении.
+                        </p>
+                    </li>
+                    <li class="about-page__step">
+                        <span class="about-page__step-number">5</span>
+                        <p class="about-page__step-text">
+                            Подтвердите заказ и ожидайте доставку — наши курьеры оперативно привезут продукты прямо к
+                            вашей двери.
+                        </p>
+                    </li>
+                </ol>
+            </section>
+
+            <section class="about-page__section">
+                <h2 class="about-page__heading">Почему доставка продуктов на дом — это удобно?</h2>
+
+                <p class="about-page__lead">
+                    Забудьте о бесконечных походах в магазин и утомительных очередях — теперь ваши любимые продукты
+                    можно заказать, не выходя из уютного дома или офиса. Планируйте покупки заранее, наслаждаясь
+                    прозрачными ценами в нашем каталоге, и будьте уверены: каждый товар доставляется свежим, сочным и
+                    отменного качества. Удобные способы оплаты и гибкие условия доставки превращают процесс заказа в
+                    настоящее удовольствие, даря вам комфорт и экономию времени с каждой покупкой.
+                </p>
+            </section>
+
+            <section class="about-page__section about-page__section--summary">
+                <h2 class="about-page__heading">Итог</h2>
+
+                <p class="about-page__summary-text">
+                    Заказывая еду на дом в Гурманчик, вы получаете не просто продукты — вы выбираете комфорт, экономию и
+                    полную уверенность в их качестве. Мы ценим ваше время и заботимся о бюджете, чтобы каждая покупка
+                    приносила только радость и удовольствие. Не упустите шанс насладиться удобной доставкой в
+                    Симферополе, Севастополе и теперь в Ялте — выбирайте Гурманчик и откройте для себя мир выгодных
+                    покупок и безупречного сервиса!
+                </p>
+            </section>
+
+            <section class="about-page__section about-page__section--documents">
+                <div class="about-page__documents" data-about-documents>
+                    <h2 class="about-page__documents-title">Документы</h2>
+
+                    <div id="about-documents-text"
+                         class="about-page__documents-text"
+                         aria-label="Документы"
+                         tabindex="0">
+                        @Html.Raw(documentsTopic?.Body)
+                    </div>
+
+                    <button type="button"
+                            class="about-page__documents-toggle"
+                            aria-expanded="false"
+                            aria-controls="about-documents-text">
+                        <span class="about-page__documents-toggle-text">Развернуть</span>
+                        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/down_arrow.svg")"
+                             alt=""
+                             class="about-page__documents-arrow">
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>

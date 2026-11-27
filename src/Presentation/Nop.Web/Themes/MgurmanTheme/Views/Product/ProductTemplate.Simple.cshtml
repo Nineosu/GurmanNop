@@ -149,7 +149,9 @@
                                 }
 
                                 <button type="button"
-                                        class="product-card__btn">
+                                        class="product-card__btn product-card__favorite-btn"
+                                        data-productid="@Model.Id"
+                                        onclick="toggleWishlist(this, '@Url.RouteUrl(NopRouteNames.Ajax.ADD_PRODUCT_TO_WISHLIST_CATALOG, new { productId = Model.Id })');return false;">
                                     <img src="~/Themes/MgurmanTheme/Content/images/product-page-favorite.svg" />
                                     Избранное
                                 </button>

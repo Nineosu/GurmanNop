@@ -1563,6 +1563,54 @@ public partial class ShoppingCartController : BasePublicController
         return View(model);
     }
 
+    //add a product to the wishlist without quantity and attributes (used on catalog and product details pages)
+    [HttpPost]
+    public virtual async Task<IActionResult> AddProductToWishlist_Catalog(int productId)
+    {
+        if (!await _permissionService.AuthorizeAsync(StandardPermission.PublicStore.ENABLE_WISHLIST))
+            return Json(new { success = false, message = "Wishlist is disabled" });
+
+        var product = await _productService.GetProductByIdAsync(productId);
+        if (product == null)
+            return Json(new { success = false, message = "No product found with the specified ID" });
+
+        var customer = await _workContext.GetCurrentCustomerAsync();
+        var store = await _storeContext.GetCurrentStoreAsync();
+
+        var warnings = await _shoppingCartService.AddToWishlistAsync(customer, product, store.Id);
+        if (warnings.Any())
+            return Json(new { success = false, message = warnings.ToArray() });
+
+        //activity log
+        await _customerActivityService.InsertActivityAsync("PublicStore.AddToWishlist",
+            string.Format(await _localizationService.GetResourceAsync("ActivityLog.PublicStore.AddToWishlist"), product.Name), product);
+
+        var wishlist = await _shoppingCartService.GetShoppingCartAsync(customer, ShoppingCartType.Wishlist, store.Id);
+        var updatetopwishlistsectionhtml = string.Format(await _localizationService.GetResourceAsync("Wishlist.HeaderQuantity"), wishlist.Count);
+
+        return Json(new
+        {
+            success = true,
+            message = string.Format(await _localizationService.GetResourceAsync("Products.ProductHasBeenAddedToTheWishlist.Link"),
+                Url.RouteUrl(NopRouteNames.General.WISHLIST)),
+            updatetopwishlistsectionhtml
+        });
+    }
+
+    //get product identifiers added to the wishlist (used to highlight favorite buttons)
+    [HttpGet]
+    public virtual async Task<IActionResult> GetWishlistProductIds()
+    {
+        if (!await _permissionService.AuthorizeAsync(StandardPermission.PublicStore.ENABLE_WISHLIST))
+            return Json(new List<int>());
+
+        var customer = await _workContext.GetCurrentCustomerAsync();
+        var store = await _storeContext.GetCurrentStoreAsync();
+        var wishlist = await _shoppingCartService.GetShoppingCartAsync(customer, ShoppingCartType.Wishlist, store.Id, customWishlistId: 0);
+
+        return Json(wishlist.Select(item => item.ProductId).Distinct().ToList());
+    }
+
     [HttpPost, ActionName("Wishlist")]
     [FormValueRequired("updatecart")]
     public virtual async Task<IActionResult> UpdateWishlist(WishlistModel wishlistModel, IFormCollection form)

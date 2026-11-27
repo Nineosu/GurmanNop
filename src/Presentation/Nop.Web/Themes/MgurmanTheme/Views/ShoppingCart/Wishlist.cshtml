@@ -81,9 +81,7 @@
                                 <div class="cart__products-top">
                                     <span>Продукт</span>
                                     <span>Цена</span>
-                                    <span>Кол-во</span>
-                                    <span>Итог</span>
-                                    @if (Model.IsEditable)
+                                    @if (Model.DisplayAddToCart)
                                     {
                                         <span></span>
                                     }
@@ -192,79 +190,40 @@
                                                 @item.UnitPrice
                                             </p>
 
-                                            <div class="product-card__counter product-counter"
-                                                 data-unit="piece"
-                                                 data-step="1"
-                                                 data-min="1"
-                                                 data-max="99"
-                                                 data-cart-item="true">
-                                                <button type="button" class="counter-btn counter-block btn-minus"></button>
-                                                <div class="counter-block counter__value-block">
-                                                    @if (Model.IsEditable)
-                                                    {
-                                                        if (item.AllowedQuantities.Count > 0)
-                                                        {
-                                                            <select name="itemquantity@(item.Id)" class="qty-dropdown" style="width: 40px; text-align: center; border: none; outline: none; background: transparent; font-size: 16px;">
-                                                                @foreach (var qty in item.AllowedQuantities)
-                                                                {
-                                                                    <option selected="@qty.Selected" value="@qty.Value">@qty.Value</option>
-                                                                }
-                                                            </select>
-                                                        }
-                                                        else
-                                                        {
-                                                            <input type="text"
-                                                                   name="itemquantity@(item.Id)"
-                                                                   class="counter-value"
-                                                                   value="@item.Quantity"
-                                                                   inputmode="numeric" />
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        <span class="counter-value" style="font-size: 16px;">@item.Quantity</span>
-                                                    }
-                                                    <span class="counter-unit">шт</span>
-                                                </div>
-                                                <button type="button" class="counter-btn counter-block btn-plus"></button>
-                                            </div>
-
-                                            <p class="product-item__total">
-                                                @item.SubTotal
-                                                @if (!string.IsNullOrEmpty(item.Discount))
-                                                {
-                                                    <div class="discount" style="font-size: 12px; color: #ff5722;">
-                                                        @T("ShoppingCart.ItemYouSave", item.Discount)
-                                                    </div>
-                                                    if (item.MaximumDiscountedQty.HasValue)
-                                                    {
-                                                        <div class="discount-additional-info" style="font-size: 10px; color: #999;">
-                                                            @T("ShoppingCart.MaximumDiscountedQty", item.MaximumDiscountedQty.Value)
-                                                        </div>
-                                                    }
-                                                }
-                                            </p>
-
                                             @if (Model.DisplayAddToCart)
                                             {
                                                 <div class="product-item__actions-wrapper">
-                                                    <button type="button"
-                                                            class="product-item__cart-btn"
-                                                            onclick="document.getElementById('addtocart-@item.Id').checked = true; document.getElementById('addtocartbutton').click();"
-                                                            title="Добавить в корзину">
-                                                        <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/cart-add.svg")"
-                                                             alt="В корзину"
-                                                             class="cart-btn__img">
-                                                    </button>
+                                                    @if (item.UnitType == "kg")
+                                                    {
+                                                        @* weighted products require choosing the weight on the product page *@
+                                                        <a class="product-item__cart-btn"
+                                                           href="@(await NopUrl.RouteGenericUrlAsync<Product>(new { SeName = item.ProductSeName }))"
+                                                           title="Добавить в корзину">
+                                                            <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/cart-add.svg")"
+                                                                 alt="В корзину"
+                                                                 class="cart-btn__img">
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <button type="button"
+                                                                class="product-item__cart-btn"
+                                                                onclick="document.getElementById('addtocart-@item.Id').checked = true; document.getElementById('addtocartbutton').click();"
+                                                                title="Добавить в корзину">
+                                                            <img src="@Url.Content("~/Themes/MgurmanTheme/Content/images/cart-add.svg")"
+                                                                 alt="В корзину"
+                                                                 class="cart-btn__img">
+                                                        </button>
 
-                                                    <label class="product-item__add-to-cart-label" title="Выбрать для добавления">
-                                                        <input type="checkbox"
-                                                               id="addtocart-@item.Id"
-                                                               name="addtocart"
-                                                               value="@(item.Id)"
-                                                               class="product-item__add-to-cart-checkbox" />
-                                                        <span class="product-item__add-to-cart-custom"></span>
-                                                    </label>
+                                                        <label class="product-item__add-to-cart-label" title="Выбрать для добавления">
+                                                            <input type="checkbox"
+                                                                   id="addtocart-@item.Id"
+                                                                   name="addtocart"
+                                                                   value="@(item.Id)"
+                                                                   class="product-item__add-to-cart-checkbox" />
+                                                            <span class="product-item__add-to-cart-custom"></span>
+                                                        </label>
+                                                    }
                                                 </div>
                                             }
 

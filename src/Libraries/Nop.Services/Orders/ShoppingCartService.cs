@@ -1560,6 +1560,101 @@ public partial class ShoppingCartService : IShoppingCartService
     }
 
     /// <summary>
+    /// Add a product to the wishlist without quantity and attribute validation
+    /// </summary>
+    /// <param name="customer">Customer</param>
+    /// <param name="product">Product</param>
+    /// <param name="storeId">Store identifier</param>
+    /// <param name="wishlistId">Wishlist identifier; pass null if it's default wishlist</param>
+    /// <returns>
+    /// A task that represents the asynchronous operation
+    /// The task result contains the warnings
+    /// </returns>
+    public virtual async Task<IList<string>> AddToWishlistAsync(Customer customer, Product product, int storeId, int? wishlistId = null)
+    {
+        ArgumentNullException.ThrowIfNull(customer);
+        ArgumentNullException.ThrowIfNull(product);
+
+        var warnings = new List<string>();
+
+        if (!await _permissionService.AuthorizeAsync(StandardPermission.PublicStore.ENABLE_WISHLIST, customer))
+        {
+            warnings.Add("Wishlist is disabled");
+            return warnings;
+        }
+
+        if (customer.IsSearchEngineAccount())
+        {
+            warnings.Add("Search engine can't add to wishlist");
+            return warnings;
+        }
+
+        if (product.Deleted)
+        {
+            warnings.Add(await _localizationService.GetResourceAsync("ShoppingCart.ProductDeleted"));
+            return warnings;
+        }
+
+        if (!product.Published)
+        {
+            warnings.Add(await _localizationService.GetResourceAsync("ShoppingCart.ProductUnpublished"));
+            return warnings;
+        }
+
+        if (!await _aclService.AuthorizeAsync(product, customer) ||
+            !await _storeMappingService.AuthorizeAsync(product, storeId))
+        {
+            warnings.Add(await _localizationService.GetResourceAsync("ShoppingCart.ProductUnpublished"));
+            return warnings;
+        }
+
+        if (product.DisableWishlistButton)
+        {
+            warnings.Add(await _localizationService.GetResourceAsync("ShoppingCart.WishlistDisabled"));
+            return warnings;
+        }
+
+        var wishlist = await GetShoppingCartAsync(customer, ShoppingCartType.Wishlist, storeId, customWishlistId: wishlistId);
+
+        //the product is already in the wishlist; favorites don't use quantity, so nothing to update
+        if (wishlist.Any(item => item.ProductId == product.Id))
+            return warnings;
+
+        if (wishlist.Count >= _shoppingCartSettings.MaximumWishlistItems)
+        {
+            warnings.Add(string.Format(await _localizationService.GetResourceAsync("ShoppingCart.MaximumWishlistItems"), _shoppingCartSettings.MaximumWishlistItems));
+            return warnings;
+        }
+
+        var now = DateTime.UtcNow;
+        var shoppingCartItem = new ShoppingCartItem
+        {
+            ShoppingCartType = ShoppingCartType.Wishlist,
+            StoreId = storeId,
+            ProductId = product.Id,
+            CustomWishlistId = wishlistId,
+            AttributesXml = null,
+            CustomerEnteredPrice = decimal.Zero,
+            Quantity = 1,
+            CreatedOnUtc = now,
+            UpdatedOnUtc = now,
+            CustomerId = customer.Id
+        };
+
+        await _sciRepository.InsertAsync(shoppingCartItem);
+
+        //updated "HasShoppingCartItems" property used for performance optimization
+        var hasShoppingCartItems = !await IsCustomerShoppingCartEmptyAsync(customer);
+        if (hasShoppingCartItems != customer.HasShoppingCartItems)
+        {
+            customer.HasShoppingCartItems = hasShoppingCartItems;
+            await _customerService.UpdateCustomerAsync(customer);
+        }
+
+        return warnings;
+    }
+
+    /// <summary>
     /// Add a product to shopping cart
     /// </summary>
     /// <param name="customer">Customer</param>

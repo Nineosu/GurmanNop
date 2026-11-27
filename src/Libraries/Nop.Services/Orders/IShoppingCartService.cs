@@ -271,6 +271,19 @@ public partial interface IShoppingCartService
         int quantity = 1, bool addRequiredProducts = true, int? wishlistId = null);
 
     /// <summary>
+    /// Add a product to the wishlist without quantity and attribute validation
+    /// </summary>
+    /// <param name="customer">Customer</param>
+    /// <param name="product">Product</param>
+    /// <param name="storeId">Store identifier</param>
+    /// <param name="wishlistId">Wishlist identifier; pass null if it's default wishlist</param>
+    /// <returns>
+    /// A task that represents the asynchronous operation
+    /// The task result contains the warnings
+    /// </returns>
+    Task<IList<string>> AddToWishlistAsync(Customer customer, Product product, int storeId, int? wishlistId = null);
+
+    /// <summary>
     /// Updates the shopping cart item
     /// </summary>
     /// <param name="customer">Customer</param>

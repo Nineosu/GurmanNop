@@ -148,7 +148,10 @@
                                          data-cart-item="true"
                                          data-current-value="@displayValue">
 
-                                        <button type="button" class="counter-btn counter-block btn-minus"></button>
+                                        @if (!isWeightProduct)
+                                        {
+                                            <button type="button" class="counter-btn counter-block btn-minus"></button>
+                                        }
 
                                         <div class="counter-block counter__value-block">
                                             <input type="text"
@@ -159,7 +162,10 @@
                                             <span class="counter-unit">@unitDisplay</span>
                                         </div>
 
-                                        <button type="button" class="counter-btn counter-block btn-plus"></button>
+                                        @if (!isWeightProduct)
+                                        {
+                                            <button type="button" class="counter-btn counter-block btn-plus"></button>
+                                        }
 
                                     </div>
 
